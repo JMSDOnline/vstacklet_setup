@@ -30,24 +30,12 @@ fi
 
 
 # Create vstacklet & backup directory strucutre
-mkdir -p vstacklet /backup/{directories,databases}
-cd vstacklet
-
-# Download the needed scripts for VStacklet
-curl -LO https://raw.githubusercontent.com/JMSDOnline/vstacklet/master/vstacklet-ubuntu-stack.sh >/dev/null 2>&1;
-curl -LO https://raw.githubusercontent.com/JMSDOnline/vstacklet/master/files-backup.sh >/dev/null 2>&1;
-curl -LO https://raw.githubusercontent.com/JMSDOnline/vstacklet/master/database-backup.sh >/dev/null 2>&1;
-curl -LO https://raw.githubusercontent.com/JMSDOnline/vstacklet/master/package-backups.sh >/dev/null 2>&1;
-curl -LO https://raw.githubusercontent.com/JMSDOnline/vstacklet/master/backup-cleanup.sh >/dev/null 2>&1;
-
-# Convert all shell scripts to executable
-chmod +x *.sh
-cd
+mkdir -p /backup/{directories,databases}
 
 # Download VStacklet System Backup Executable
-curl -LO https://raw.githubusercontent.com/JMSDOnline/vstacklet/master/vs-backup >/dev/null 2>&1;
-chmod +x vs-backup
+chmod +x /etc/vstacklet/packages/backup/*
 mv vs-backup /usr/local/bin
+mv
 
 function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15 ; }
 
@@ -63,7 +51,7 @@ function _askvstacklet() {
   echo "${bold} Actively maintained and quality controlled.${normal}"
   echo
   echo
-  echo -n "${bold}${yellow}Are you ready to install VStacklet for Ubuntu 14.04 - 16.04?${normal} (${bold}${green}Y${normal}/n): "
+  echo -n "${bold}${yellow}Are you ready to install VStacklet for Ubuntu 16.04 & Debian 8?${normal} (${bold}${green}Y${normal}/n): "
   read responce
   case $responce in
     [yY] | [yY][Ee][Ss] | "" ) vstacklet=yes ;;
