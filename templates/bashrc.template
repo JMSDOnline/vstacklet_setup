@@ -1005,5 +1005,34 @@ prompt_OFF
 # sh-shell:bash
 # End:
 
+function _updateRepo() {
+  echo >>"${OUTTO}" 2>&1;
+  cd /etc/vstacklet
+  git pull >>"${OUTTO}" 2>&1;
+  echo
+  echo -n "vstacklet_setup              :: " >>"${OUTTO}" 2>&1;
+    cd ${local_setup} && git checkout development
+    git pull >>"${OUTTO}" 2>&1;
+  echo -n "vstacklet_php7_base          :: " >>"${OUTTO}" 2>&1;
+    cd ${local_php7} && git checkout development
+    git pull >>"${OUTTO}" 2>&1;
+  echo -n "vstacklet_php5_base          :: " >>"${OUTTO}" 2>&1;
+    cd ${local_php5} && git checkout development
+    git pull >>"${OUTTO}" 2>&1;
+  echo -n "vstacklet_hhvm_base          :: " >>"${OUTTO}" 2>&1;
+    cd ${local_hhvm} && git checkout development
+    git pull >>"${OUTTO}" 2>&1;
+  echo -n "vstacklet_nginx_base         :: " >>"${OUTTO}" 2>&1;
+    cd ${local_nginx} && git checkout development
+    git pull >>"${OUTTO}" 2>&1;
+  echo -n "vstacklet_varnish_base       :: " >>"${OUTTO}" 2>&1;
+    cd ${local_varnish} && git checkout development
+    git pull >>"${OUTTO}" 2>&1;
+  echo -n "vstacklet_packages           :: " >>"${OUTTO}" 2>&1;
+    cd ${local_packages} && git checkout development
+    git pull >>"${OUTTO}" 2>&1;
+}
+
+
 export NVM_DIR="/root/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
