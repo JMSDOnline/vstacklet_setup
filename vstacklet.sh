@@ -16,7 +16,7 @@ standout=$(tput smso);normal=$(tput sgr0);title=${standout};
 #################################################################################
 if [[ -f /usr/bin/lsb_release ]]; then
     DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
-else [ -f "/etc/debian_version" ]; then
+elif [ -f "/etc/debian_version" ]; then
     DISTRO=='Debian'
 fi
 #################################################################################
