@@ -58,7 +58,7 @@ function _intro() {
     echo "$DISTRO: ${alert} It looks like you are running $DISTRO, which is not supported by QuickBox ${normal} "
     echo 'Exiting...'
     exit 1
-  elif [[ ! "$CODENAME" =~ ("wily"|"jessie") ]]; then
+  elif [[ ! "$CODENAME" =~ ("xenial"|"jessie") ]]; then
     echo "Oh drats! You do not appear to be running a supported $DISTRO release."
     echo "${bold}$SETNAME${normal}"
     echo 'Exiting...'
