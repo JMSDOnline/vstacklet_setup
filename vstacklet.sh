@@ -63,17 +63,23 @@ clear
 
 function _vstacklet() {
   if [[ ${vstacklet} == "yes" ]]; then
-    DIR="vstacklet"
+    DIR="/etc/vstacklet/setup/"
     if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-      . "$DIR/vstacklet-ubuntu-stack.sh"
+      . "${DIR}vstacklet-server-stack.sh"
   fi
 }
 
 function _novstacklet() {
   if [[ ${vstacklet} == "no" ]]; then
     echo "${bold}${cyan}Cancelling install. If you would like to run this installer in the future${normal}"
-    echo "${bold}${cyan}type${normal} ${green}${bold}./vstacklet.sh${normal} - ${bold}${cyan}followed by tapping Enter on your keyboard.${normal}"
+    echo "${bold}${cyan}type${normal} ${green}${bold}./etc/vstacklet/setup/vstacklet.sh${normal}"
+    echo "${bold}${cyan}followed by tapping Enter on your keyboard.${normal}"
   fi
 }
 
-_askvstacklet;if [[ ${vstacklet} == "yes" ]]; then echo -n "${bold}Installing VStacklet Kit for 14.04, 15.04, 15.10 and 16.04 support${normal} ... ";_vstacklet; elif [[ ${vstacklet} == "no" ]]; then _novstacklet;  fi
+_askvstacklet;
+if [[ ${vstacklet} == "yes" ]]; then
+  echo -n "${bold}Installing VStacklet Kit for Ubuntu 16.04 & Debian 8 support${normal} ... ";_vstacklet;
+elif [[ ${vstacklet} == "no" ]]; then
+  _novstacklet;
+fi
