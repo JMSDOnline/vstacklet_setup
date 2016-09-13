@@ -361,7 +361,7 @@ function _updates() {
 function _askphpversion() {
   echo -e "1) php${green}7.0${normal}"
   echo -e "2) php${green}5.6${normal}"
-  echo -e "3) php${green}HHVM${normal}"
+  echo -e "3) ${green}HHVM${normal}"
   echo -ne "${yellow}What version of php do you want?${normal} (Default php${green}7.0${normal}): "; read version
   case $version in
     1 | "") PHPVERSION=7.0  ;;
@@ -393,7 +393,6 @@ function _php7() {
     # ensure xml module is activated
     phpenmod -v 7.0 xml
     echo "${OK}"
-    echo
 }
 function _php5() {
     echo -ne "Installing and Adjusting php${green}$PHPVERSION${normal}-fpm w/ OPCode Cache ... "
@@ -416,10 +415,9 @@ function _php5() {
     # ensure xml module is activated
     phpenmod -v 5.6 xml
     echo "${OK}"
-    echo
 }
 function _hhvm() {
-    echo -ne "Installing and Adjusting ${green}$PHPVERSION${normal} w/ OPCode Cache ... "
+    echo -ne "Installing and Adjusting ${green}$PHPVERSION${normal} ... "
     apt -y install hhvm >>"${OUTTO}" 2>&1;
     /usr/share/hhvm/install_fastcgi.sh >>"${OUTTO}" 2>&1;
     update-rc.d hhvm defaults >>"${OUTTO}" 2>&1;
@@ -428,7 +426,6 @@ function _hhvm() {
     cp ${local_hhvm}server.ini.template /etc/hhvm/server.ini
     cp ${local_hhvm}php.ini.template /etc/hhvm/php.ini
     echo "${OK}"
-    echo
 }
 
 # install nginx function (8)
@@ -452,7 +449,7 @@ function _nginx() {
           mkdir -p /srv/www/${sitename}/{logs,ssl,public}
       fi
       if [[ "$PHPVERSION" = "5.6" ]];then
-          cp ${local_php5}nginx/conf.d/default.conf.save /etc/nginx/conf.d/${sitename}.conf
+          cp ${local_php5}nginx/conf.d/default.php5.conf.save /etc/nginx/conf.d/${sitename}.conf
           # build applications web root directory if sitename is provided
           mkdir -p /srv/www/${sitename}/{logs,ssl,public}
       fi
@@ -485,7 +482,6 @@ function _nginx() {
       echo '<?php phpinfo(); ?>' > /srv/www/${hostname1}/public/checkinfo.php
   fi
   echo "${OK}"
-  echo
 }
 
 # adjust permissions function (9)
@@ -494,7 +490,6 @@ function _perms() {
   chmod -R g+rw /srv/www/*
   sh -c 'find /srv/www/* -type d -print0 | sudo xargs -0 chmod g+s'
   echo "${OK}"
-  echo
 }
 
 # install varnish function (10)
@@ -502,7 +497,7 @@ function _varnish() {
   apt -y install varnish >>"${OUTTO}" 2>&1;
   cd /etc/varnish
   mv default.vcl default.vcl.ORIG
-  cp ${local_varnish}default.vcl >/dev/null 2>&1;
+  cp ${local_varnish}default.vcl.template /etc/varnish/default.vcl >/dev/null 2>&1;
   cd
   sed -i "s/127.0.0.1/${server_ip}/" /etc/varnish/default.vcl
   sed -i "s/6081/80/" /etc/default/varnish
@@ -514,7 +509,6 @@ function _varnish() {
   sed -i "s/6081/80/" /lib/systemd/system/varnish.service
   systemctl daemon-reload
   echo "${OK}"
-  echo
 }
 
 # install memcached for php7 function (12)
@@ -535,14 +529,12 @@ function _memcached() {
         sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.0/fpm/conf.d/20-memcached.ini
         sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.0/cli/conf.d/20-memcached.ini
     fi
-echo "${OK}"
-echo
+    echo "${OK}"
 }
 
 function _nomemcached() {
     if [[ ${memcached} == "no" ]]; then
         echo "${cyan}Skipping Memcached Installation...${normal}"
-        echo
     fi
 }
 
@@ -570,14 +562,12 @@ function _ioncube() {
         cd
         rm -rf tmp*
         echo "${OK}"
-        echo
     fi
 }
 
 function _noioncube() {
     if [[ ${ioncube} == "no" ]]; then
         echo "${cyan}Skipping IonCube Installation...${normal}"
-        echo
     fi
 }
 
@@ -597,14 +587,12 @@ function _mariadb() {
         export DEBIAN_FRONTEND=noninteractive
         apt -y install mariadb-server >>"${OUTTO}" 2>&1;
         echo "${OK}"
-        echo
     fi
 }
 
 function _nomariadb() {
     if [[ ${mariadb} == "no" ]]; then
         echo "${cyan}Skipping MariaDB Installation...${normal}"
-        echo
     fi
 }
 
@@ -673,7 +661,6 @@ function _phpmyadmin() {
 function _nophpmyadmin() {
     if [[ ${phpmyadmin} == "no" ]]; then
         echo "${cyan}Skipping phpMyAdmin Installation...${normal}"
-        echo
     fi
 }
 
@@ -734,7 +721,6 @@ function _csf() {
                -e 's/PT_USERMEM = "200"/PT_USERMEM = "500"/' \
                -e 's/PT_USERTIME = "1800"/PT_USERTIME = "7200"/' /etc/csf/csf.conf;
     echo "${OK}"
-    echo
     # install sendmail as it's binary is required by CSF
     echo "${green}Installing Sendmail${normal} ... "
     apt -y install sendmail >>"${OUTTO}" 2>&1;
@@ -742,7 +728,6 @@ function _csf() {
     # add administrator email
     echo "${magenta}${bold}Add an Administrator Email Below for Aliases Inclusion${normal}"
     read -p "${bold}Email: ${normal}" admin_email
-    echo
     echo "${bold}The email ${green}${bold}$admin_email${normal} ${bold}is now the forwarding address for root mail${normal}"
     echo -n "${green}finalizing sendmail installation${normal} ... "
     # install aliases
@@ -759,14 +744,12 @@ abuse: root
 root: $admin_email" > /etc/aliases
     newaliases >>"${OUTTO}" 2>&1;
     echo "${OK}"
-    echo
   fi
 }
 
 function _nocsf() {
   if [[ ${csf} == "no" ]]; then
     echo "${cyan}Skipping Config Server Firewall Installation${normal} ... "
-    echo
   fi
 }
 
@@ -809,7 +792,6 @@ function _cloudflare() {
 # END CLOUDFLARE WHITELIST
 " >> /etc/csf/csf.allow
     echo "${OK}"
-    echo
   fi
 }
 
@@ -848,14 +830,12 @@ abuse: root
 root: $admin_email" > /etc/aliases
     newaliases >>"${OUTTO}" 2>&1;
     echo "${OK}"
-    echo
   fi
 }
 
 function _nosendmail() {
   if [[ ${sendmail} == "no" ]]; then
     echo "${cyan}Skipping Sendmail Installation...${normal}"
-    echo
   fi
 }
 
@@ -877,29 +857,28 @@ function _nosendmail() {
 function _locenhance() {
   if [[ $sitename -eq yes ]];then
     locconf1="include vstacklet\/location\/cache-busting.conf;"
-    sed -i "s/locconf1/${locconf1}/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/locconf1/${locconf1}/" /etc/nginx/conf.d/$sitename.conf
     locconf2="include vstacklet\/location\/cross-domain-fonts.conf;"
-    sed -i "s/locconf2/${locconf2}/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/locconf2/${locconf2}/" /etc/nginx/conf.d/$sitename.conf
     locconf3="include vstacklet\/location\/expires.conf;"
-    sed -i "s/locconf3/${locconf3}/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/locconf3/${locconf3}/" /etc/nginx/conf.d/$sitename.conf
     locconf4="include vstacklet\/location\/protect-system-files.conf;"
-    sed -i "s/locconf4/${locconf4}/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/locconf4/${locconf4}/" /etc/nginx/conf.d/$sitename.conf
     locconf5="include vstacklet\/location\/letsencrypt.conf;"
-    sed -i "s/locconf5/${locconf5}/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/locconf5/${locconf5}/" /etc/nginx/conf.d/$sitename.conf
   else
     locconf1="include vstacklet\/location\/cache-busting.conf;"
-    sed -i "s/locconf1/${locconf1}/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/locconf1/${locconf1}/" /etc/nginx/conf.d/$hostname1.conf
     locconf2="include vstacklet\/location\/cross-domain-fonts.conf;"
-    sed -i "s/locconf2/${locconf2}/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/locconf2/${locconf2}/" /etc/nginx/conf.d/$hostname1.conf
     locconf3="include vstacklet\/location\/expires.conf;"
-    sed -i "s/locconf3/${locconf3}/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/locconf3/${locconf3}/" /etc/nginx/conf.d/$hostname1.conf
     locconf4="include vstacklet\/location\/protect-system-files.conf;"
-    sed -i "s/locconf4/${locconf4}/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/locconf4/${locconf4}/" /etc/nginx/conf.d/$hostname1.conf
     locconf5="include vstacklet\/location\/letsencrypt.conf;"
-    sed -i "s/locconf5/${locconf5}/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/locconf5/${locconf5}/" /etc/nginx/conf.d/$hostname1.conf
   fi
   echo "${OK}"
-  echo
 }
 
 # Round 2 - Security
@@ -907,18 +886,18 @@ function _locenhance() {
 function _security() {
   if [[ $sitename -eq yes ]];then
     secconf1="include vstacklet\/directive-only\/sec-bad-bots.conf;"
-    sed -i "s/secconf1/${secconf1}/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/secconf1/${secconf1}/" /etc/nginx/conf.d/$sitename.conf
     secconf2="include vstacklet\/directive-only\/sec-file-injection.conf;"
-    sed -i "s/secconf2/${secconf2}/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/secconf2/${secconf2}/" /etc/nginx/conf.d/$sitename.conf
     secconf3="include vstacklet\/directive-only\/sec-php-easter-eggs.conf;"
-    sed -i "s/secconf3/${secconf3}/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/secconf3/${secconf3}/" /etc/nginx/conf.d/$sitename.conf
   else
     secconf1="include vstacklet\/directive-only\/sec-bad-bots.conf;"
-    sed -i "s/secconf1/${secconf1}/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/secconf1/${secconf1}/" /etc/nginx/conf.d/$hostname1.conf
     secconf2="include vstacklet\/directive-only\/sec-file-injection.conf;"
-    sed -i "s/secconf2/${secconf2}/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/secconf2/${secconf2}/" /etc/nginx/conf.d/$hostname1.conf
     secconf3="include vstacklet\/directive-only\/sec-php-easter-eggs.conf;"
-    sed -i "s/secconf3/${secconf3}/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/secconf3/${secconf3}/" /etc/nginx/conf.d/$hostname1.conf
   fi
   echo "${OK}"
   echo
@@ -968,7 +947,6 @@ function _cert() {
         #sed -i "s/sitename.key/${hostname1}.key/" /etc/nginx/conf.d/${hostname1}.conf
     fi
     echo "${OK}"
-    echo
   fi
 }
 
@@ -988,7 +966,6 @@ function _nocert() {
       #sed -i "s/sitename.key/${hostname1}.key/" /etc/nginx/conf.d/${hostname1}.conf
     fi
 #    echo "${cyan}Skipping SSL Certificate Creation...${normal}"
-#    echo
 #  fi
 }
 
