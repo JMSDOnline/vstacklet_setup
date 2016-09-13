@@ -1007,6 +1007,13 @@ prompt_OFF
 
 function _updateRepo() {
   echo >>"${OUTTO}" 2>&1;
+  local_setup=/etc/vstacklet/setup/
+  local_php7=/etc/vstacklet/php7/
+  local_php5=/etc/vstacklet/php5/
+  local_hhvm=/etc/vstacklet/hhvm/
+  local_nginx=/etc/vstacklet/nginx/
+  local_varnish=/etc/vstacklet/varnish/
+  local_packages=/etc/vstacklet/packages/
   cd /etc/vstacklet
   git pull >>"${OUTTO}" 2>&1;
   echo
