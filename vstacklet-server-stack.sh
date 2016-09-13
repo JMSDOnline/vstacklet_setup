@@ -1117,7 +1117,7 @@ echo -n "${bold}Installing Common Software Properties${normal} ... ";_softcommon
 echo -n "${bold}Installing: nano, unzip, dos2unix, htop, iotop, libwww-perl${normal} ... ";_depends;
 echo -n "${bold}Installing signed keys for MariaDB, Nginx, PHP7, HHVM and Varnish${normal} ... ";_keys;
 echo -n "${bold}Adding trusted repositories${normal} ... ";_repos;
-echo -n "${bold}Applying Updates${normal} ... ";_updates;
+_updates;
 
 #_askphpversion;
 if [[ "$PHPVERSION" == "7.0" ]]; then
