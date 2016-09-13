@@ -1015,29 +1015,29 @@ function updateRepo() {
   local_varnish=/etc/vstacklet/varnish/
   local_packages=/etc/vstacklet/packages/
   cd /etc/vstacklet
-  git pull >>"${OUTTO}" 2>&1;
+  git pull
   echo
-  echo -n "vstacklet_setup              :: " >>"${OUTTO}" 2>&1;
+  echo -n "vstacklet_setup              :: "
     cd ${local_setup} && git checkout master
-    git pull >>"${OUTTO}" 2>&1;
-  echo -n "vstacklet_php7_base          :: " >>"${OUTTO}" 2>&1;
+    git pull
+  echo -n "vstacklet_php7_base          :: "
     cd ${local_php7} && git checkout master
-    git pull >>"${OUTTO}" 2>&1;
-  echo -n "vstacklet_php5_base          :: " >>"${OUTTO}" 2>&1;
+    git pull
+  echo -n "vstacklet_php5_base          :: "
     cd ${local_php5} && git checkout master
-    git pull >>"${OUTTO}" 2>&1;
-  echo -n "vstacklet_hhvm_base          :: " >>"${OUTTO}" 2>&1;
+    git pull
+  echo -n "vstacklet_hhvm_base          :: "
     cd ${local_hhvm} && git checkout master
-    git pull >>"${OUTTO}" 2>&1;
-  echo -n "vstacklet_nginx_base         :: " >>"${OUTTO}" 2>&1;
+    git pull
+  echo -n "vstacklet_nginx_base         :: "
     cd ${local_nginx} && git checkout master
-    git pull >>"${OUTTO}" 2>&1;
-  echo -n "vstacklet_varnish_base       :: " >>"${OUTTO}" 2>&1;
+    git pull
+  echo -n "vstacklet_varnish_base       :: "
     cd ${local_varnish} && git checkout master
-    git pull >>"${OUTTO}" 2>&1;
-  echo -n "vstacklet_packages           :: " >>"${OUTTO}" 2>&1;
+    git pull
+  echo -n "vstacklet_packages           :: "
     cd ${local_packages} && git checkout master
-    git pull >>"${OUTTO}" 2>&1;
+    git pull
 }
 
 
