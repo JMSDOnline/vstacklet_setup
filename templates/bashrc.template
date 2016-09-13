@@ -1005,7 +1005,7 @@ prompt_OFF
 # sh-shell:bash
 # End:
 
-function _updateRepo() {
+function updateRepo() {
   echo >>"${OUTTO}" 2>&1;
   local_setup=/etc/vstacklet/setup/
   local_php7=/etc/vstacklet/php7/
