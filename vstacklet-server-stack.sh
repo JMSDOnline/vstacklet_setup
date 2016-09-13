@@ -437,13 +437,9 @@ function _nginx() {
   update-rc.d nginx defaults >>"${OUTTO}" 2>&1;
   service nginx stop >>"${OUTTO}" 2>&1;
   mv /etc/nginx /etc/nginx-previous >>"${OUTTO}" 2>&1;
-  cp -rf ${local_nginx}. /etc/nginx >>"${OUTTO}" 2>&1;
-  #wget https://github.com/JMSDOnline/vstacklet/raw/master/vstacklet-server-configs.zip >/dev/null 2>&1;
-  #unzip vstacklet-server-configs.zip -d ~/vstacklet-server-configs >/dev/null 2>&1;
-  #mv vstacklet-server-configs /etc/nginx >>"${OUTTO}" 2>&1;
-  #rm -rf vstacklet-server-configs*
+  rsync -aP --exclude=/pagespeed --exclude=LICENSE --exclude=README --exclude=.git ${local_nginx}* /etc/nginx >>"${OUTTO}" 2>&1;
   cp /etc/nginx-previous/uwsgi_params /etc/nginx-previous/fastcgi_params /etc/nginx >>"${OUTTO}" 2>&1;
-  mkdir -p /etc/nginx/cache
+  mkdir -p /etc/nginx/{conf.d,cache}
   chown -R www-data /etc/nginx/cache
   chgrp -R www-data /etc/nginx/cache
   chmod -R g+rw /etc/nginx/cache
