@@ -864,26 +864,26 @@ function _nosendmail() {
 # enhance configuration function (17)
 function _locenhance() {
   if [[ $sitename -eq yes ]];then
-    locconf1="include vstacklet\/location\/cache-busting.conf;"
+    locconf1="include server.configs\/location\/cache-busting.conf;"
     sed -i "s/locconf1/${locconf1}/" /etc/nginx/conf.d/$sitename.conf
-    locconf2="include vstacklet\/location\/cross-domain-fonts.conf;"
+    locconf2="include server.configs\/location\/cross-domain-fonts.conf;"
     sed -i "s/locconf2/${locconf2}/" /etc/nginx/conf.d/$sitename.conf
-    locconf3="include vstacklet\/location\/expires.conf;"
+    locconf3="include server.configs\/location\/expires.conf;"
     sed -i "s/locconf3/${locconf3}/" /etc/nginx/conf.d/$sitename.conf
-    locconf4="include vstacklet\/location\/protect-system-files.conf;"
+    locconf4="include server.configs\/location\/protect-system-files.conf;"
     sed -i "s/locconf4/${locconf4}/" /etc/nginx/conf.d/$sitename.conf
-    locconf5="include vstacklet\/location\/letsencrypt.conf;"
+    locconf5="include server.configs\/location\/letsencrypt.conf;"
     sed -i "s/locconf5/${locconf5}/" /etc/nginx/conf.d/$sitename.conf
   else
-    locconf1="include vstacklet\/location\/cache-busting.conf;"
+    locconf1="include server.configs\/location\/cache-busting.conf;"
     sed -i "s/locconf1/${locconf1}/" /etc/nginx/conf.d/$hostname1.conf
-    locconf2="include vstacklet\/location\/cross-domain-fonts.conf;"
+    locconf2="include server.configs\/location\/cross-domain-fonts.conf;"
     sed -i "s/locconf2/${locconf2}/" /etc/nginx/conf.d/$hostname1.conf
-    locconf3="include vstacklet\/location\/expires.conf;"
+    locconf3="include server.configs\/location\/expires.conf;"
     sed -i "s/locconf3/${locconf3}/" /etc/nginx/conf.d/$hostname1.conf
-    locconf4="include vstacklet\/location\/protect-system-files.conf;"
+    locconf4="include server.configs\/location\/protect-system-files.conf;"
     sed -i "s/locconf4/${locconf4}/" /etc/nginx/conf.d/$hostname1.conf
-    locconf5="include vstacklet\/location\/letsencrypt.conf;"
+    locconf5="include server.configs\/location\/letsencrypt.conf;"
     sed -i "s/locconf5/${locconf5}/" /etc/nginx/conf.d/$hostname1.conf
   fi
   echo "${OK}"
@@ -893,18 +893,18 @@ function _locenhance() {
 # optimize security configuration function (18)
 function _security() {
   if [[ $sitename -eq yes ]];then
-    secconf1="include vstacklet\/directive-only\/sec-bad-bots.conf;"
+    secconf1="include server.configs\/directives\/sec-bad-bots.conf;"
     sed -i "s/secconf1/${secconf1}/" /etc/nginx/conf.d/$sitename.conf
-    secconf2="include vstacklet\/directive-only\/sec-file-injection.conf;"
+    secconf2="include server.configs\/directives\/sec-file-injection.conf;"
     sed -i "s/secconf2/${secconf2}/" /etc/nginx/conf.d/$sitename.conf
-    secconf3="include vstacklet\/directive-only\/sec-php-easter-eggs.conf;"
+    secconf3="include server.configs\/directives\/sec-php-easter-eggs.conf;"
     sed -i "s/secconf3/${secconf3}/" /etc/nginx/conf.d/$sitename.conf
   else
-    secconf1="include vstacklet\/directive-only\/sec-bad-bots.conf;"
+    secconf1="include server.configs\/directives\/sec-bad-bots.conf;"
     sed -i "s/secconf1/${secconf1}/" /etc/nginx/conf.d/$hostname1.conf
-    secconf2="include vstacklet\/directive-only\/sec-file-injection.conf;"
+    secconf2="include server.configs\/directives\/sec-file-injection.conf;"
     sed -i "s/secconf2/${secconf2}/" /etc/nginx/conf.d/$hostname1.conf
-    secconf3="include vstacklet\/directive-only\/sec-php-easter-eggs.conf;"
+    secconf3="include server.configs\/directives\/sec-php-easter-eggs.conf;"
     sed -i "s/secconf3/${secconf3}/" /etc/nginx/conf.d/$hostname1.conf
   fi
   echo "${OK}"
