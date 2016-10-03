@@ -275,7 +275,7 @@ function _softcommon() {
 
 # package and repo addition (b) _install softwares and packages_
 function _depends() {
-  apt -y install nano unzip git dos2unix htop iotop bc libwww-perl dnsutils language-pack-en-base sudo >>"${OUTTO}" 2>&1;
+  apt -y install nano unzip git dos2unix htop iotop bc libwww-perl dnsutils language-pack-en-base curl sudo >>"${OUTTO}" 2>&1;
   echo "${OK}"
   echo
 }
