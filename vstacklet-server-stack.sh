@@ -311,6 +311,10 @@ EOF
     cat >/etc/apt/sources.list.d/varnish-cache.list<<EOF
 deb https://repo.varnish-cache.org/ubuntu/ trusty varnish-4.1
 EOF
+    # include hhvm sources
+    cat >/etc/apt/sources.list.d/hhvm.list<<EOF
+deb http://dl.hhvm.com/ubuntu $(lsb_release -sc) main
+EOF
     # use nginx mainline
     cat >/etc/apt/sources.list.d/nginx-mainline-$(lsb_release -sc).list<<EOF
 deb http://nginx.org/packages/mainline/ubuntu/ $(lsb_release -sc) nginx
@@ -334,6 +338,10 @@ EOF
     # use the jessie branch to install varnish 4.1
     cat >/etc/apt/sources.list.d/varnish-cache.list<<EOF
 deb https://repo.varnish-cache.org/debian/ jessie varnish-4.1
+EOF
+  # include hhvm sources
+  cat >/etc/apt/sources.list.d/hhvm.list<<EOF
+deb http://dl.hhvm.com/debian $(lsb_release -sc) main
 EOF
     # use nginx mainline
     cat >/etc/apt/sources.list.d/nginx-mainline-"${CODENAME}".list<<EOF
@@ -380,7 +388,7 @@ function _php7() {
     sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
                -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
                -e "s/expose_php = On/expose_php = Off/" \
-               -e "s/128M/512M/" \
+               -e "s/128M/768M/" \
                -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
                -e "s/;opcache.enable=0/opcache.enable=1/" \
                -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
