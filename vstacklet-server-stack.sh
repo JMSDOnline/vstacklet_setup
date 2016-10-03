@@ -229,13 +229,13 @@ fi
   if [[ $DISTRO == Debian ]]; then
     export DEBIAN_FRONTEND=noninteractive
     yes '' | apt-get update >>"${OUTTO}" 2>&1
-    apt -y purge samba samba-common >>"${OUTTO}" 2>&1
+    apt-get -y purge samba samba-common >>"${OUTTO}" 2>&1
     yes '' | apt-get upgrade >>"${OUTTO}" 2>&1
   else
     export DEBIAN_FRONTEND=noninteractive
-    apt -y update >>"${OUTTO}" 2>&1
-    apt -y purge samba samba-common >>"${OUTTO}" 2>&1
-    apt -y upgrade >>"${OUTTO}" 2>&1
+    apt-get -y update >>"${OUTTO}" 2>&1
+    apt-get -y purge samba samba-common >>"${OUTTO}" 2>&1
+    apt-get -y upgrade >>"${OUTTO}" 2>&1
   fi
     #if [[ -e /etc/ssh/sshd_config ]]; then
     #  echo "Port 2222" /etc/ssh/sshd_config
@@ -248,15 +248,15 @@ fi
 
 # setting locale function (5)
 function _locale() {
-    apt -y install language-pack-en-base >>"${OUTTO}" 2>&1
+    apt-get -y install language-pack-en-base >>"${OUTTO}" 2>&1
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
     echo "LANG=en_US.UTF-8" > /etc/default/locale
     echo "LANGUAGE=en_US.UTF-8">>/etc/default/locale
     echo "LC_ALL=en_US.UTF-8" >>/etc/default/locale
     if [[ -e /usr/sbin/locale-gen ]]; then locale-gen >>"${OUTTO}" 2>&1
     else
-        apt -y update >>"${OUTTO}" 2>&1
-        apt -y install locales locale-gen >>"${OUTTO}" 2>&1
+        apt-get -y update >>"${OUTTO}" 2>&1
+        apt-get -y install locales locale-gen >>"${OUTTO}" 2>&1
         locale-gen >>"${OUTTO}" 2>&1
         export LANG="en_US.UTF-8"
         export LC_ALL="en_US.UTF-8"
@@ -268,14 +268,14 @@ function _locale() {
 # Update packages and add MariaDB, Varnish 4, and Nginx 1.9.9 (mainline) repositories
 function _softcommon() {
   # package and repo addition (a) _install common properties_
-  apt -y install software-properties-common python-software-properties apt-transport-https >>"${OUTTO}" 2>&1;
+  apt-get -y install software-properties-common python-software-properties apt-transport-https >>"${OUTTO}" 2>&1;
   echo "${OK}"
   echo
 }
 
 # package and repo addition (b) _install softwares and packages_
 function _depends() {
-  apt -y install nano unzip git dos2unix htop iotop bc libwww-perl dnsutils language-pack-en-base curl sudo >>"${OUTTO}" 2>&1;
+  apt-get -y install nano unzip git dos2unix htop iotop bc libwww-perl dnsutils language-pack-en-base curl sudo >>"${OUTTO}" 2>&1;
   echo "${OK}"
   echo
 }
@@ -358,9 +358,9 @@ EOF
 function _updates() {
   echo -n "Updating system ... "
   export DEBIAN_FRONTEND=noninteractive &&
-  apt -y update >>"${OUTTO}" 2>&1;
-  apt -y upgrade >>"${OUTTO}" 2>&1;
-  apt -y autoremove >>"${OUTTO}" 2>&1;
+  apt-get -y update >>"${OUTTO}" 2>&1;
+  apt-get -y upgrade >>"${OUTTO}" 2>&1;
+  apt-get -y autoremove >>"${OUTTO}" 2>&1;
   echo "${OK}"
   echo
 }
@@ -384,7 +384,7 @@ function _askphpversion() {
 # install php function (11)
 function _php7() {
     echo -ne "Installing and Adjusting php${green}$PHPVERSION${normal}-fpm w/ OPCode Cache ... "
-    apt -y install php7.0 php7.0-fpm php7.0-mbstring php7.0-zip php7.0-mysql php7.0-curl php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache php7.0-xml >>"${OUTTO}" 2>&1;
+    apt-get -y install php7.0 php7.0-fpm php7.0-mbstring php7.0-zip php7.0-mysql php7.0-curl php7.0-gd php7.0-json php7.0-mcrypt php7.0-opcache php7.0-xml >>"${OUTTO}" 2>&1;
     sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
                -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
                -e "s/expose_php = On/expose_php = Off/" \
@@ -404,7 +404,7 @@ function _php7() {
 }
 function _php5() {
     echo -ne "Installing and Adjusting php${green}$PHPVERSION${normal}-fpm w/ OPCode Cache ... "
-    apt -y install libssl1.0.2 php-common php5.6 php5.6-cli php5.6-common php5.6-fpm php5.6-json php5.6-opcache php5.6-readline php5.6-mysql php5.6-curl php5.6-gd php5.6-dev php5.6-imap php5.6-mcrypt php5.6-mbstring php5.6-xml php-gettext >>"${OUTTO}" 2>&1;
+    apt-get -y install libssl1.0.2 php-common php5.6 php5.6-cli php5.6-common php5.6-fpm php5.6-json php5.6-opcache php5.6-readline php5.6-mysql php5.6-curl php5.6-gd php5.6-dev php5.6-imap php5.6-mcrypt php5.6-mbstring php5.6-xml php-gettext >>"${OUTTO}" 2>&1;
     sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
                -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
                -e "s/expose_php = On/expose_php = Off/" \
@@ -426,7 +426,7 @@ function _php5() {
 }
 function _hhvm() {
     echo -ne "Installing and Adjusting ${green}$PHPVERSION${normal} ... "
-    apt -y install hhvm >>"${OUTTO}" 2>&1;
+    apt-get -y install hhvm >>"${OUTTO}" 2>&1;
     /usr/share/hhvm/install_fastcgi.sh >>"${OUTTO}" 2>&1;
     update-rc.d hhvm defaults >>"${OUTTO}" 2>&1;
     /usr/bin/update-alternatives --install /usr/bin/php php /usr/bin/hhvm 60 >>"${OUTTO}" 2>&1;
@@ -502,7 +502,7 @@ function _perms() {
 
 # install varnish function (10)
 function _varnish() {
-  apt -y install varnish >>"${OUTTO}" 2>&1;
+  apt-get -y install varnish >>"${OUTTO}" 2>&1;
   cd /etc/varnish
   mv default.vcl default.vcl.ORIG
   cp ${local_varnish}default.vcl.template /etc/varnish/default.vcl >/dev/null 2>&1;
@@ -532,8 +532,8 @@ function _askmemcached() {
 function _memcached() {
     if [[ ${memcached} == "yes" ]]; then
         echo -n "Installing Memcached for PHP 7 ... "
-        apt -y install php7.0-dev git pkg-config build-essential libmemcached-dev >/dev/null 2>&1;
-        apt -y install php-memcached memcached >/dev/null 2>&1;
+        apt-get -y install php7.0-dev git pkg-config build-essential libmemcached-dev >/dev/null 2>&1;
+        apt-get -y install php-memcached memcached >/dev/null 2>&1;
         sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.0/fpm/conf.d/20-memcached.ini
         sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.0/cli/conf.d/20-memcached.ini
     fi
@@ -593,7 +593,7 @@ function _askmariadb() {
 function _mariadb() {
     if [[ ${mariadb} == "yes" ]]; then
         export DEBIAN_FRONTEND=noninteractive
-        apt -y install mariadb-server >>"${OUTTO}" 2>&1;
+        apt-get -y install mariadb-server >>"${OUTTO}" 2>&1;
         echo "${OK}"
     fi
 }
@@ -621,7 +621,7 @@ function _phpmyadmin() {
         mysqlpass=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15);
         mysqladmin -u root -h localhost password "${mysqlpass}"
         echo -n "${bold}Installing MySQL with user:${normal} ${bold}${green}root${normal}${bold} / passwd:${normal} ${bold}${green}${mysqlpass}${normal} ... "
-        apt -y install debconf-utils >>"${OUTTO}" 2>&1;
+        apt-get -y install debconf-utils >>"${OUTTO}" 2>&1;
         export DEBIAN_FRONTEND=noninteractive
         # silently configure given options and install
         echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | debconf-set-selections
@@ -629,7 +629,7 @@ function _phpmyadmin() {
         echo "phpmyadmin phpmyadmin/mysql/app-pass password ${pmapass}" | debconf-set-selections
         echo "phpmyadmin phpmyadmin/app-password-confirm password ${pmapass}" | debconf-set-selections
         echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect none" | debconf-set-selections
-        apt -y install phpmyadmin >>"${OUTTO}" 2>&1;
+        apt-get -y install phpmyadmin >>"${OUTTO}" 2>&1;
         if [[ $sitename -eq yes ]];then
             # create a sym-link to live directory.
             ln -s /usr/share/phpmyadmin /srv/www/${sitename}/public
@@ -685,7 +685,7 @@ function _askcsf() {
 function _csf() {
   if [[ ${csf} == "yes" ]]; then
     echo -n "${green}Installing and Adjusting CSF${normal} ... "
-    apt -y install e2fsprogs >/dev/null 2>&1;
+    apt-get -y install e2fsprogs >/dev/null 2>&1;
     wget https://download.configserver.com/csf.tgz
     #wget http://www.configserver.com/free/csf.tgz >/dev/null 2>&1;
     tar -xzf csf.tgz >/dev/null 2>&1;
@@ -731,7 +731,7 @@ function _csf() {
     echo "${OK}"
     # install sendmail as it's binary is required by CSF
     echo "${green}Installing Sendmail${normal} ... "
-    apt -y install sendmail >>"${OUTTO}" 2>&1;
+    apt-get -y install sendmail >>"${OUTTO}" 2>&1;
     export DEBIAN_FRONTEND=noninteractive | /usr/sbin/sendmailconfig >>"${OUTTO}" 2>&1;
     # add administrator email
     echo "${magenta}${bold}Add an Administrator Email Below for Aliases Inclusion${normal}"
@@ -816,7 +816,7 @@ function _asksendmail() {
 function _sendmail() {
   if [[ ${sendmail} == "yes" ]]; then
     echo "${green}Installing Sendmail ... ${normal}"
-    apt -y install sendmail >>"${OUTTO}" 2>&1;
+    apt-get -y install sendmail >>"${OUTTO}" 2>&1;
     export DEBIAN_FRONTEND=noninteractive | /usr/sbin/sendmailconfig >>"${OUTTO}" 2>&1;
     # add administrator email
     echo "${magenta}Add an Administrator Email Below for Aliases Inclusion${normal}"
