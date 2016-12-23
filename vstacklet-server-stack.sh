@@ -43,7 +43,7 @@ function _intro() {
   echo
   echo "   ${title}              Heads Up!               ${normal} "
   echo "   ${message_title}  VStacklet works with the following  ${normal} "
-  echo "   ${message_title}  Ubuntu 16.04 & Debian 8     ${normal} "
+  echo "   ${message_title}  Ubuntu 16.04, 16.10 & Debian 8     ${normal} "
   echo
   echo
   echo "${green}Checking distribution ...${normal}"
@@ -58,7 +58,7 @@ function _intro() {
     echo "$DISTRO: ${alert} It looks like you are running $DISTRO, which is not supported by QuickBox ${normal} "
     echo 'Exiting...'
     exit 1
-  elif [[ ! "$CODENAME" =~ ("xenial"|"jessie") ]]; then
+  elif [[ ! "$CODENAME" =~ ("yakkety"|"xenial"|"jessie") ]]; then
     echo "Oh drats! You do not appear to be running a supported $DISTRO release."
     echo "${bold}$SETNAME${normal}"
     echo 'Exiting...'
