@@ -865,26 +865,26 @@ function _nosendmail() {
 function _locenhance() {
   if [[ $sitename -eq yes ]];then
     locconf1="include server.configs\/location\/cache-busting.conf;"
-    sed -i "s/locconf1/${locconf1}/" /etc/nginx/conf.d/$sitename.conf
+    sed -i "s/locconf1/$locconf1/" /etc/nginx/conf.d/${sitename}.conf
     locconf2="include server.configs\/location\/cross-domain-fonts.conf;"
-    sed -i "s/locconf2/${locconf2}/" /etc/nginx/conf.d/$sitename.conf
+    sed -i "s/locconf2/$locconf2/" /etc/nginx/conf.d/${sitename}.conf
     locconf3="include server.configs\/location\/expires.conf;"
-    sed -i "s/locconf3/${locconf3}/" /etc/nginx/conf.d/$sitename.conf
+    sed -i "s/locconf3/$locconf3/" /etc/nginx/conf.d/${sitename}.conf
     locconf4="include server.configs\/location\/protect-system-files.conf;"
-    sed -i "s/locconf4/${locconf4}/" /etc/nginx/conf.d/$sitename.conf
+    sed -i "s/locconf4/$locconf4/" /etc/nginx/conf.d/${sitename}.conf
     locconf5="include server.configs\/location\/letsencrypt.conf;"
-    sed -i "s/locconf5/${locconf5}/" /etc/nginx/conf.d/$sitename.conf
+    sed -i "s/locconf5/$locconf5/" /etc/nginx/conf.d/${sitename}.conf
   else
     locconf1="include server.configs\/location\/cache-busting.conf;"
-    sed -i "s/locconf1/${locconf1}/" /etc/nginx/conf.d/$hostname1.conf
+    sed -i "s/locconf1/$locconf1/" /etc/nginx/conf.d/${hostname1}.conf
     locconf2="include server.configs\/location\/cross-domain-fonts.conf;"
-    sed -i "s/locconf2/${locconf2}/" /etc/nginx/conf.d/$hostname1.conf
+    sed -i "s/locconf2/$locconf2/" /etc/nginx/conf.d/${hostname1}.conf
     locconf3="include server.configs\/location\/expires.conf;"
-    sed -i "s/locconf3/${locconf3}/" /etc/nginx/conf.d/$hostname1.conf
+    sed -i "s/locconf3/$locconf3/" /etc/nginx/conf.d/${hostname1}.conf
     locconf4="include server.configs\/location\/protect-system-files.conf;"
-    sed -i "s/locconf4/${locconf4}/" /etc/nginx/conf.d/$hostname1.conf
+    sed -i "s/locconf4/$locconf4/" /etc/nginx/conf.d/${hostname1}.conf
     locconf5="include server.configs\/location\/letsencrypt.conf;"
-    sed -i "s/locconf5/${locconf5}/" /etc/nginx/conf.d/$hostname1.conf
+    sed -i "s/locconf5/$locconf5/" /etc/nginx/conf.d/${hostname1}.conf
   fi
   echo "${OK}"
 }
@@ -894,18 +894,18 @@ function _locenhance() {
 function _security() {
   if [[ $sitename -eq yes ]];then
     secconf1="include server.configs\/directives\/sec-bad-bots.conf;"
-    sed -i "s/secconf1/${secconf1}/" /etc/nginx/conf.d/$sitename.conf
+    sed -i "s/secconf1/$secconf1/" /etc/nginx/conf.d/${sitename}.conf
     secconf2="include server.configs\/directives\/sec-file-injection.conf;"
-    sed -i "s/secconf2/${secconf2}/" /etc/nginx/conf.d/$sitename.conf
+    sed -i "s/secconf2/$secconf2/" /etc/nginx/conf.d/${sitename}.conf
     secconf3="include server.configs\/directives\/sec-php-easter-eggs.conf;"
-    sed -i "s/secconf3/${secconf3}/" /etc/nginx/conf.d/$sitename.conf
+    sed -i "s/secconf3/$secconf3/" /etc/nginx/conf.d/${sitename}.conf
   else
     secconf1="include server.configs\/directives\/sec-bad-bots.conf;"
-    sed -i "s/secconf1/${secconf1}/" /etc/nginx/conf.d/$hostname1.conf
+    sed -i "s/secconf1/$secconf1/" /etc/nginx/conf.d/${hostname1}.conf
     secconf2="include server.configs\/directives\/sec-file-injection.conf;"
-    sed -i "s/secconf2/${secconf2}/" /etc/nginx/conf.d/$hostname1.conf
+    sed -i "s/secconf2/$secconf2/" /etc/nginx/conf.d/${hostname1}.conf
     secconf3="include server.configs\/directives\/sec-php-easter-eggs.conf;"
-    sed -i "s/secconf3/${secconf3}/" /etc/nginx/conf.d/$hostname1.conf
+    sed -i "s/secconf3/$secconf3/" /etc/nginx/conf.d/${hostname1}.conf
   fi
   echo "${OK}"
   echo
@@ -935,7 +935,7 @@ function _cert() {
              -e "s/# include vstacklet\/directive-only\/ssl.conf;/include vstacklet\/directive-only\/ssl.conf;/" \
              -e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/" \
              -e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/" /etc/nginx/conf.d/${sitename}.conf
-        sed -i "s/sitename/${sitename}/" /etc/nginx/conf.d/${sitename}.conf
+        sed -i "s/sitename/$sitename/" /etc/nginx/conf.d/${sitename}.conf
         #sed -i "s/sitename.crt/${sitename}_access/" /etc/nginx/conf.d/${sitename}.conf
         #sed -i "s/sitename.key/${sitename}_error/" /etc/nginx/conf.d/${sitename}.conf
         #sed -i "s/sitename.crt/${sitename}.crt/" /etc/nginx/conf.d/${sitename}.conf
@@ -948,7 +948,7 @@ function _cert() {
              -e "s/# include vstacklet\/directive-only\/ssl.conf;/include vstacklet\/directive-only\/ssl.conf;/" \
              -e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/" \
              -e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/" /etc/nginx/conf.d/${hostname1}.conf
-        sed -i "s/sitename/${hostname1}/" /etc/nginx/conf.d/${hostname1}.conf
+        sed -i "s/sitename/$hostname1/" /etc/nginx/conf.d/${hostname1}.conf
         #sed -i "s/sitename_access/${hostname1}_access/" /etc/nginx/conf.d/${hostname1}.conf
         #sed -i "s/sitename_error/${hostname1}_error/" /etc/nginx/conf.d/${hostname1}.conf
         #sed -i "s/sitename.crt/${hostname1}.crt/" /etc/nginx/conf.d/${hostname1}.conf
@@ -961,13 +961,13 @@ function _cert() {
 function _nocert() {
 #  if [[ ${cert} == "no" ]]; then
     if [[ $sitename -eq yes ]];then
-      sed -i "s/sitename/${sitename}/" /etc/nginx/conf.d/${sitename}.conf
+      sed -i "s/sitename/$sitename/" /etc/nginx/conf.d/${sitename}.conf
       #sed -i "s/sitename.crt/${sitename}_access/" /etc/nginx/conf.d/${sitename}.conf
       #sed -i "s/sitename.key/${sitename}_error/" /etc/nginx/conf.d/${sitename}.conf
       #sed -i "s/sitename.crt/${sitename}.crt/" /etc/nginx/conf.d/${sitename}.conf
       #sed -i "s/sitename.key/${sitename}.key/" /etc/nginx/conf.d/${sitename}.conf
     else
-      sed -i "s/sitename/${hostname1}/" /etc/nginx/conf.d/${hostname1}.conf
+      sed -i "s/sitename/$hostname1/" /etc/nginx/conf.d/${hostname1}.conf
       #sed -i "s/sitename.crt/${hostname1}_access/" /etc/nginx/conf.d/${hostname1}.conf
       #sed -i "s/sitename.key/${hostname1}_error/" /etc/nginx/conf.d/${hostname1}.conf
       #sed -i "s/sitename.crt/${hostname1}.crt/" /etc/nginx/conf.d/${hostname1}.conf
