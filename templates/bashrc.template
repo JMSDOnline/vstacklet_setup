@@ -148,25 +148,20 @@ ALERT=${BWhite}${On_Red} # Bold White on red background
 GREETING=${BWhite}${On_Purple} # Bold White on red background
 date=`date`
 
+###   This Server is OFF limits, if your   ###
+###   here leave your ip is logged.        ###
+
+
 echo ""
 echo ""
 echo "|========================================================================|"
-echo -e "     Welcome to HOSTNAME!"
+echo "|------------------------------------------------------------------------|"
+echo "|  ###################   This Server is OFF limits   ####################|"
+echo "|------------------------------------------------------------------------|"
+echo -e "     You're on HOSTNAME!"
 echo -e "     ${BCyan}Your logged IP is ${BRed}$DISPLAY${NC}"
 echo -e "     ${BCyan}Your BASH version is ${BRed}${BASH_VERSION%.*}${BCyan}${NC}"
 echo "     $date"
-echo "|------------------------------------------------------------------------|"
-echo "|  Just type any one of the following commands                           |"
-echo "|  to turn on different bash prompts                                     |"
-echo "|------------------------------------------------------------------------|"
-echo -e "|  ${BGreen}commandprompt_on${NC}                                                      |"
-echo "|  this prompt shows last command used & more                            |"
-echo -e "|  ${BGreen}powerprompt_on${NC} (default)                                              |"
-echo "|  this prompt shows colorful system data - cpu, load etc.               |"
-echo -e "|  ${BGreen}basicprompt_on${NC}                                                        |"
-echo "|  this prompt shows color coded load & cpu avg                          |"
-echo -e "|  ${BGreen}prompt_OFF${NC}                                                            |"
-echo "|  this turns off prompts and goes back to default                       |"
 echo "|========================================================================|"
 echo ""
 echo ""
@@ -958,7 +953,7 @@ complete -F _killall killall killps
 
 #=========================================================================
 #
-#  QUICKBOX SPECIFICS SECTION
+#  VSTACKLET SPECIFICS SECTION
 #
 #=========================================================================
 
