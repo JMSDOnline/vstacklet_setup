@@ -265,7 +265,7 @@ function _locale() {
 }
 
 # system packages and repos function (6)
-# Update packages and add MariaDB, Varnish 4, and Nginx 1.9.9 (mainline) repositories
+# Update packages and add MariaDB, Varnish, and Nginx repositories
 function _softcommon() {
   # package and repo addition (a) _install common properties_
   apt-get -y install software-properties-common python-software-properties apt-transport-https >>"${OUTTO}" 2>&1;
@@ -438,7 +438,7 @@ function _hhvm() {
 
 # install nginx function (8)
 function _nginx() {
-  apt-get -y install nginx >>"${OUTTO}" 2>&1;
+  apt-get -y install nginx-full nginx-extras >>"${OUTTO}" 2>&1;
   update-rc.d nginx defaults >>"${OUTTO}" 2>&1;
   service nginx stop >>"${OUTTO}" 2>&1;
   mv /etc/nginx /etc/nginx-previous >>"${OUTTO}" 2>&1;
