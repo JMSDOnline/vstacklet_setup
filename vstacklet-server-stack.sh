@@ -933,9 +933,9 @@ function _cert() {
       sed -i -e "s/# listen [::]:443 ssl http2;/listen [::]:443 ssl http2;/" \
              -e "s/# listen *:443 ssl http2;/listen *:443 ssl http2;/" \
              -e "s/# include vstacklet\/directive-only\/ssl.conf;/include vstacklet\/directive-only\/ssl.conf;/" \
-             -e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/" \
-             -e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/" /etc/nginx/conf.d/${sitename}.conf
-        sed -i "s/sitename/$sitename/" /etc/nginx/conf.d/${sitename}.conf
+             -e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/${sitename}\/ssl\/${sitename}.crt;/" \
+             -e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/${sitename}\/ssl\/${sitename}.key;/" /etc/nginx/conf.d/${sitename}.conf
+        sed -i "s/sitename/${sitename}/" /etc/nginx/conf.d/${sitename}.conf
         #sed -i "s/sitename.crt/${sitename}_access/" /etc/nginx/conf.d/${sitename}.conf
         #sed -i "s/sitename.key/${sitename}_error/" /etc/nginx/conf.d/${sitename}.conf
         #sed -i "s/sitename.crt/${sitename}.crt/" /etc/nginx/conf.d/${sitename}.conf
@@ -946,9 +946,9 @@ function _cert() {
       sed -i -e "s/# listen [::]:443 ssl http2;/listen [::]:443 ssl http2;/" \
              -e "s/# listen *:443 ssl http2;/listen *:443 ssl http2;/" \
              -e "s/# include vstacklet\/directive-only\/ssl.conf;/include vstacklet\/directive-only\/ssl.conf;/" \
-             -e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/" \
-             -e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/" /etc/nginx/conf.d/${hostname1}.conf
-        sed -i "s/sitename/$hostname1/" /etc/nginx/conf.d/${hostname1}.conf
+             -e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/${hostname1}\/ssl\/${hostname1}.crt;/" \
+             -e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/${hostname1}\/ssl\/${hostname1}.key;/" /etc/nginx/conf.d/${hostname1}.conf
+        sed -i "s/sitename/${hostname1}/" /etc/nginx/conf.d/${hostname1}.conf
         #sed -i "s/sitename_access/${hostname1}_access/" /etc/nginx/conf.d/${hostname1}.conf
         #sed -i "s/sitename_error/${hostname1}_error/" /etc/nginx/conf.d/${hostname1}.conf
         #sed -i "s/sitename.crt/${hostname1}.crt/" /etc/nginx/conf.d/${hostname1}.conf
@@ -961,13 +961,13 @@ function _cert() {
 function _nocert() {
 #  if [[ ${cert} == "no" ]]; then
     if [[ $sitename -eq yes ]];then
-      sed -i "s/sitename/$sitename/" /etc/nginx/conf.d/${sitename}.conf
+      sed -i "s/sitename/${sitename}/" /etc/nginx/conf.d/${sitename}.conf
       #sed -i "s/sitename.crt/${sitename}_access/" /etc/nginx/conf.d/${sitename}.conf
       #sed -i "s/sitename.key/${sitename}_error/" /etc/nginx/conf.d/${sitename}.conf
       #sed -i "s/sitename.crt/${sitename}.crt/" /etc/nginx/conf.d/${sitename}.conf
       #sed -i "s/sitename.key/${sitename}.key/" /etc/nginx/conf.d/${sitename}.conf
     else
-      sed -i "s/sitename/$hostname1/" /etc/nginx/conf.d/${hostname1}.conf
+      sed -i "s/sitename/${hostname1}/" /etc/nginx/conf.d/${hostname1}.conf
       #sed -i "s/sitename.crt/${hostname1}_access/" /etc/nginx/conf.d/${hostname1}.conf
       #sed -i "s/sitename.key/${hostname1}_error/" /etc/nginx/conf.d/${hostname1}.conf
       #sed -i "s/sitename.crt/${hostname1}.crt/" /etc/nginx/conf.d/${hostname1}.conf
