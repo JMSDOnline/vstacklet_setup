@@ -288,9 +288,9 @@ function _keys() {
   # PHP7 Signed Keys - via ondrej_ubuntu_php
   apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x5a16e7281be7a449 >>"${OUTTO}" 2>&1;
   # Varnish Signed Keys
-  curl -s https://repo.varnish-cache.org/GPG-key.txt | apt-key add - > /dev/null 2>&1;
+  #curl -s https://repo.varnish-cache.org/GPG-key.txt | apt-key add - > /dev/null 2>&1;
   # Nginx Signed Keys
-  curl -s http://nginx.org/keys/nginx_signing.key | apt-key add - > /dev/null 2>&1;
+  #curl -s http://nginx.org/keys/nginx_signing.key | apt-key add - > /dev/null 2>&1;
   # HHVM Signed Keys
   curl -s http://dl.hhvm.com/conf/hhvm.gpg.key | apt-key add - > /dev/null 2>&1;
   echo "${OK}"
@@ -308,18 +308,18 @@ deb [arch=amd64,i386] http://mirrors.syringanetworks.net/mariadb/repo/10.2/ubunt
 deb-src http://mirrors.syringanetworks.net/mariadb/repo/10.2/ubuntu/ $(lsb_release -sc) main
 EOF
     # use the trusty branch to install varnish
-    cat >/etc/apt/sources.list.d/varnish-cache.list<<EOF
-deb https://repo.varnish-cache.org/ubuntu/ trusty varnish-4.1
-EOF
+#    cat >/etc/apt/sources.list.d/varnish-cache.list<<EOF
+#deb https://repo.varnish-cache.org/ubuntu/ trusty varnish-4.1
+#EOF
     # include hhvm sources
     cat >/etc/apt/sources.list.d/hhvm.list<<EOF
 deb http://dl.hhvm.com/ubuntu $(lsb_release -sc) main
 EOF
     # use nginx mainline
-    cat >/etc/apt/sources.list.d/nginx-mainline-$(lsb_release -sc).list<<EOF
-deb http://nginx.org/packages/mainline/ubuntu/ $(lsb_release -sc) nginx
-deb-src http://nginx.org/packages/mainline/ubuntu/ $(lsb_release -sc) nginx
-EOF
+#    cat >/etc/apt/sources.list.d/nginx-mainline-$(lsb_release -sc).list<<EOF
+#deb http://nginx.org/packages/mainline/ubuntu/ $(lsb_release -sc) nginx
+#deb-src http://nginx.org/packages/mainline/ubuntu/ $(lsb_release -sc) nginx
+#EOF
   fi
 
   if [[ $DISTRO == Debian ]]; then
@@ -336,18 +336,18 @@ deb [arch=amd64,i386] http://mirrors.syringanetworks.net/mariadb/repo/10.2/debia
 deb-src http://mirrors.syringanetworks.net/mariadb/repo/10.2/debian/ $(lsb_release -sc) main
 EOF
     # use the jessie branch to install varnish 4.1
-    cat >/etc/apt/sources.list.d/varnish-cache.list<<EOF
-deb https://repo.varnish-cache.org/debian/ jessie varnish-4.1
-EOF
+#    cat >/etc/apt/sources.list.d/varnish-cache.list<<EOF
+#deb https://repo.varnish-cache.org/debian/ jessie varnish-4.1
+#EOF
   # include hhvm sources
   cat >/etc/apt/sources.list.d/hhvm.list<<EOF
 deb http://dl.hhvm.com/debian $(lsb_release -sc) main
 EOF
     # use nginx mainline
-    cat >/etc/apt/sources.list.d/nginx-mainline-"${CODENAME}".list<<EOF
-deb http://nginx.org/packages/mainline/debian/ "${CODENAME}" nginx
-deb-src http://nginx.org/packages/mainline/debian/ "${CODENAME}" nginx
-EOF
+#    cat >/etc/apt/sources.list.d/nginx-mainline-"${CODENAME}".list<<EOF
+#deb http://nginx.org/packages/mainline/debian/ "${CODENAME}" nginx
+#deb-src http://nginx.org/packages/mainline/debian/ "${CODENAME}" nginx
+#EOF
   fi
 
   echo "${OK}"
@@ -438,7 +438,7 @@ function _hhvm() {
 
 # install nginx function (8)
 function _nginx() {
-  apt-get -y install nginx-full nginx-extras >>"${OUTTO}" 2>&1;
+  apt-get -y install nginx-extras >>"${OUTTO}" 2>&1;
   update-rc.d nginx defaults >>"${OUTTO}" 2>&1;
   service nginx stop >>"${OUTTO}" 2>&1;
   mv /etc/nginx /etc/nginx-previous >>"${OUTTO}" 2>&1;
