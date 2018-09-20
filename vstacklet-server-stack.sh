@@ -969,12 +969,12 @@ function _cert() {
       
       openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /srv/www/${sitename}/ssl/${sitename}.key -out /srv/www/${sitename}/ssl/${sitename}.crt
       chmod 400 /etc/ssl/private/${sitename}.key
-      sed -i -e "s/# listen [::]:443 ssl http2;/listen [::]:443 ssl http2;/" \
-      -e "s/# listen *:443 ssl http2;/listen *:443 ssl http2;/" \
-      -e "s/# include vstacklet\/directive-only\/ssl.conf;/include vstacklet\/directive-only\/ssl.conf;/" \
-      -e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/${sitename}\/ssl\/${sitename}.crt;/" \
-      -e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/${sitename}\/ssl\/${sitename}.key;/" /etc/nginx/conf.d/${sitename}.conf
-      sed -i "s/sitename/${sitename}/" /etc/nginx/conf.d/${sitename}.conf
+      sed -i -e "s/# listen [::]:443 ssl http2;/listen [::]:443 ssl http2;/g" \
+      -e "s/# listen *:443 ssl http2;/listen *:443 ssl http2;/g" \
+      -e "s/# include vstacklet\/directive-only\/ssl.conf;/include vstacklet\/directive-only\/ssl.conf;/g" \
+      -e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/${sitename}\/ssl\/${sitename}.crt;/g" \
+      -e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/${sitename}\/ssl\/${sitename}.key;/g" /etc/nginx/conf.d/${sitename}.conf
+      sed -i "s/sitename/${sitename}/g" /etc/nginx/conf.d/${sitename}.conf
       #sed -i "s/sitename.crt/${sitename}_access/" /etc/nginx/conf.d/${sitename}.conf
       #sed -i "s/sitename.key/${sitename}_error/" /etc/nginx/conf.d/${sitename}.conf
       #sed -i "s/sitename.crt/${sitename}.crt/" /etc/nginx/conf.d/${sitename}.conf
@@ -982,11 +982,11 @@ function _cert() {
     else
       openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /srv/www/${hostname1}/ssl/${hostname1}.key -out /srv/www/${hostname1}/ssl/${hostname1}.crt
       chmod 400 /etc/ssl/private/${hostname1}.key
-      sed -i -e "s/# listen [::]:443 ssl http2;/listen [::]:443 ssl http2;/" \
-      -e "s/# listen *:443 ssl http2;/listen *:443 ssl http2;/" \
-      -e "s/# include vstacklet\/directive-only\/ssl.conf;/include vstacklet\/directive-only\/ssl.conf;/" \
-      -e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/${hostname1}\/ssl\/${hostname1}.crt;/" \
-      -e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/${hostname1}\/ssl\/${hostname1}.key;/" /etc/nginx/conf.d/${hostname1}.conf
+      sed -i -e "s/# listen [::]:443 ssl http2;/listen [::]:443 ssl http2;/g" \
+      -e "s/# listen *:443 ssl http2;/listen *:443 ssl http2;/g" \
+      -e "s/# include vstacklet\/directive-only\/ssl.conf;/include vstacklet\/directive-only\/ssl.conf;/g" \
+      -e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/${hostname1}\/ssl\/${hostname1}.crt;/g" \
+      -e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/${hostname1}\/ssl\/${hostname1}.key;/g" /etc/nginx/conf.d/${hostname1}.conf
       sed -i "s/sitename/${hostname1}/" /etc/nginx/conf.d/${hostname1}.conf
       #sed -i "s/sitename_access/${hostname1}_access/" /etc/nginx/conf.d/${hostname1}.conf
       #sed -i "s/sitename_error/${hostname1}_error/" /etc/nginx/conf.d/${hostname1}.conf
