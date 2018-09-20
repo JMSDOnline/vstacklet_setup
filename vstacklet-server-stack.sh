@@ -125,7 +125,7 @@ function _asksitename() {
 }
 
 function _sitename() {
-  if [[ ${sitename} == "yes" ]]; then
+  if [[ $sitename == yes ]]; then
     read -p "${bold}Name for your main websites root directory ${normal} : " sitename
     echo
     echo "Your website directory has been set to /srv/www/${green}${bold}${sitename}${normal}/public/"
@@ -144,9 +144,9 @@ function _nositename() {
 function _bashrc() {
   cp ${local_setup}templates/bashrc.template /root/.bashrc
   if [[ $sitename -eq yes ]];then
-    sed -i "s/HOSTNAME/${sitename}/" /root/.bashrc
+    sed -i "s/HOSTNAME/${sitename}/g" /root/.bashrc
   else
-    sed -i "s/HOSTNAME/${hostname1}/" /root/.bashrc
+    sed -i "s/HOSTNAME/${hostname1}/g" /root/.bashrc
   fi
   
   profile="/root/.profile"
@@ -404,24 +404,24 @@ function _askphpversion() {
 function _php7() {
   echo -ne "Installing and Adjusting php${green}$PHPVERSION${normal}-fpm w/ OPCode Cache ... "
   apt-get -y install php7.2 php7.2-fpm php7.2-mbstring php7.2-zip php7.2-mysql php7.2-curl php7.2-gd php7.2-json php7.2-opcache php7.2-xml >>"${OUTTO}" 2>&1;
-  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
-  -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
-  -e "s/expose_php = On/expose_php = Off/" \
-  -e "s/128M/768M/" \
-  -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
-  -e "s/;opcache.enable=0/opcache.enable=1/" \
-  -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
-  -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
-  -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.2/fpm/php.ini
-  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
-  -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
-  -e "s/expose_php = On/expose_php = Off/" \
-  -e "s/128M/768M/" \
-  -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
-  -e "s/;opcache.enable=0/opcache.enable=1/" \
-  -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
-  -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
-  -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.2/cli/php.ini
+  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/g" \
+  -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/g" \
+  -e "s/expose_php = On/expose_php = Off/g" \
+  -e "s/128M/768M/g" \
+  -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" \
+  -e "s/;opcache.enable=0/opcache.enable=1/g" \
+  -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/g" \
+  -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/g" \
+  -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/g" /etc/php/7.2/fpm/php.ini
+  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/g" \
+  -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/g" \
+  -e "s/expose_php = On/expose_php = Off/g" \
+  -e "s/128M/768M/g" \
+  -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" \
+  -e "s/;opcache.enable=0/opcache.enable=1/g" \
+  -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/g" \
+  -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/g" \
+  -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/g" /etc/php/7.2/cli/php.ini
   # ensure opcache module is activated
   phpenmod -v 7.2 opcache
   # ensure mcrypt module is activated
@@ -444,15 +444,15 @@ function _php7() {
 function _php5() {
   echo -ne "Installing and Adjusting php${green}$PHPVERSION${normal}-fpm w/ OPCode Cache ... "
   apt-get -y install libssl1.0.2 php-common php5.6 php5.6-cli php5.6-common php5.6-fpm php5.6-json php5.6-opcache php5.6-readline php5.6-mysql php5.6-curl php5.6-gd php5.6-dev php5.6-imap php5.6-mcrypt php5.6-mbstring php5.6-xml php-gettext >>"${OUTTO}" 2>&1;
-  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
-  -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
-  -e "s/expose_php = On/expose_php = Off/" \
-  -e "s/128M/512M/" \
-  -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
-  -e "s/;opcache.enable=0/opcache.enable=1/" \
-  -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
-  -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
-  -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/5.6/fpm/php.ini
+  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/g" \
+  -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/g" \
+  -e "s/expose_php = On/expose_php = Off/g" \
+  -e "s/128M/512M/g" \
+  -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" \
+  -e "s/;opcache.enable=0/opcache.enable=1/g" \
+  -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/g" \
+  -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/g" \
+  -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/g" /etc/php/5.6/fpm/php.ini
   # ensure opcache module is activated
   phpenmod -v 5.6 opcache
   # ensure mcrypt module is activated
@@ -546,14 +546,14 @@ function _varnish() {
   mv default.vcl default.vcl.ORIG
   cp ${local_varnish}default.vcl.template /etc/varnish/default.vcl >/dev/null 2>&1;
   cd
-  sed -i "s/127.0.0.1/${server_ip}/" /etc/varnish/default.vcl
-  sed -i "s/6081/80/" /etc/default/varnish
+  sed -i "s/127.0.0.1/${server_ip}/g" /etc/varnish/default.vcl
+  sed -i "s/6081/80/g" /etc/default/varnish
   # then there is varnish with systemd in ubuntu 15.x
   # let us shake that headache now
   cp /lib/systemd/system/varnishlog.service /etc/systemd/system/
   cp /lib/systemd/system/varnish.service /etc/systemd/system/
-  sed -i "s/6081/80/" /etc/systemd/system/varnish.service
-  sed -i "s/6081/80/" /lib/systemd/system/varnish.service
+  sed -i "s/6081/80/g" /etc/systemd/system/varnish.service
+  sed -i "s/6081/80/g" /lib/systemd/system/varnish.service
   systemctl daemon-reload
   echo "${OK}"
 }
@@ -733,20 +733,20 @@ function _csf() {
     sh install.sh >>"${OUTTO}" 2>&1;
     perl /usr/local/csf/bin/csftest.pl >>"${OUTTO}" 2>&1;
     # modify csf blocklists - essentially like CloudFlare, but on your machine
-    sed -i.bak -e "s/#SPAMDROP|86400|0|/SPAMDROP|86400|100|/" \
-    -e "s/#SPAMEDROP|86400|0|/SPAMEDROP|86400|100|/" \
-    -e "s/#DSHIELD|86400|0|/DSHIELD|86400|100|/" \
-    -e "s/#TOR|86400|0|/TOR|86400|100|/" \
-    -e "s/#ALTTOR|86400|0|/ALTTOR|86400|100|/" \
-    -e "s/#BOGON|86400|0|/BOGON|86400|100|/" \
-    -e "s/#HONEYPOT|86400|0|/HONEYPOT|86400|100|/" \
-    -e "s/#CIARMY|86400|0|/CIARMY|86400|100|/" \
-    -e "s/#BFB|86400|0|/BFB|86400|100|/" \
-    -e "s/#OPENBL|86400|0|/OPENBL|86400|100|/" \
-    -e "s/#AUTOSHUN|86400|0|/AUTOSHUN|86400|100|/" \
-    -e "s/#MAXMIND|86400|0|/MAXMIND|86400|100|/" \
-    -e "s/#BDE|3600|0|/BDE|3600|100|/" \
-    -e "s/#BDEALL|86400|0|/BDEALL|86400|100|/" /etc/csf/csf.blocklists;
+    sed -i.bak -e "s/#SPAMDROP|86400|0|/SPAMDROP|86400|100|/g" \
+    -e "s/#SPAMEDROP|86400|0|/SPAMEDROP|86400|100|/g" \
+    -e "s/#DSHIELD|86400|0|/DSHIELD|86400|100|/g" \
+    -e "s/#TOR|86400|0|/TOR|86400|100|/g" \
+    -e "s/#ALTTOR|86400|0|/ALTTOR|86400|100|/g" \
+    -e "s/#BOGON|86400|0|/BOGON|86400|100|/g" \
+    -e "s/#HONEYPOT|86400|0|/HONEYPOT|86400|100|/g" \
+    -e "s/#CIARMY|86400|0|/CIARMY|86400|100|/g" \
+    -e "s/#BFB|86400|0|/BFB|86400|100|/g" \
+    -e "s/#OPENBL|86400|0|/OPENBL|86400|100|/g" \
+    -e "s/#AUTOSHUN|86400|0|/AUTOSHUN|86400|100|/g" \
+    -e "s/#MAXMIND|86400|0|/MAXMIND|86400|100|/g" \
+    -e "s/#BDE|3600|0|/BDE|3600|100|/g" \
+    -e "s/#BDEALL|86400|0|/BDEALL|86400|100|/g" /etc/csf/csf.blocklists;
     # modify csf process ignore - ignore nginx, varnish & mysql
     echo >> /etc/csf/csf.pignore;
     echo "[ VStacklet Additions - These are necessary to avoid noisy emails ]" >> /etc/csf/csf.pignore;
@@ -757,16 +757,16 @@ function _csf() {
     echo "exe:/lib/systemd/systemd-timesyncd" >> /etc/csf/csf.pignore;
     echo "exe:/lib/systemd/systemd-resolved" >> /etc/csf/csf.pignore;
     # modify csf conf - make suitable changes for non-cpanel environment
-    sed -i.bak -e 's/TESTING = "1"/TESTING = "0"/' \
-    -e 's/RESTRICT_SYSLOG = "0"/RESTRICT_SYSLOG = "3"/' \
-    -e 's/TCP_IN = "20,21,22,25,53,80,110,143,443,465,587,993,995,2077,2078,2082,2083,2086,2087,2095,2096"/TCP_IN = "20,21,22,25,53,80,110,143,443,465,587,993,995,8080"/' \
-    -e 's/TCP_OUT = "20,21,22,25,37,43,53,80,110,113,443,587,873,993,995,2086,2087,2089,2703"/TCP_OUT = "20,21,22,25,37,43,53,80,110,113,443,465,587,873,993,995,8080"/' \
-    -e 's/TCP6_IN = "20,21,22,25,53,80,110,143,443,465,587,993,995,2077,2078,2082,2083,2086,2087,2095,2096"/TCP6_IN = "20,21,22,25,53,80,110,143,443,465,587,993,995,8080"/' \
-    -e 's/TCP6_OUT = "20,21,22,25,37,43,53,80,110,113,443,587,873,993,995,2086,2087,2089,2703"/TCP6_OUT = "20,21,22,25,37,43,53,80,110,113,443,465,587,873,993,995,8080"/' \
-    -e 's/DENY_TEMP_IP_LIMIT = "100"/DENY_TEMP_IP_LIMIT = "1000"/' \
-    -e 's/SMTP_ALLOWUSER = "cpanel"/SMTP_ALLOWUSER = "root"/' \
-    -e 's/PT_USERMEM = "200"/PT_USERMEM = "500"/' \
-    -e 's/PT_USERTIME = "1800"/PT_USERTIME = "7200"/' /etc/csf/csf.conf;
+    sed -i.bak -e 's/TESTING = "1"/TESTING = "0"/g' \
+    -e 's/RESTRICT_SYSLOG = "0"/RESTRICT_SYSLOG = "3"/g' \
+    -e 's/TCP_IN = "20,21,22,25,53,80,110,143,443,465,587,993,995,2077,2078,2082,2083,2086,2087,2095,2096"/TCP_IN = "20,21,22,25,53,80,110,143,443,465,587,993,995,8080"/g' \
+    -e 's/TCP_OUT = "20,21,22,25,37,43,53,80,110,113,443,587,873,993,995,2086,2087,2089,2703"/TCP_OUT = "20,21,22,25,37,43,53,80,110,113,443,465,587,873,993,995,8080"/g' \
+    -e 's/TCP6_IN = "20,21,22,25,53,80,110,143,443,465,587,993,995,2077,2078,2082,2083,2086,2087,2095,2096"/TCP6_IN = "20,21,22,25,53,80,110,143,443,465,587,993,995,8080"/g' \
+    -e 's/TCP6_OUT = "20,21,22,25,37,43,53,80,110,113,443,587,873,993,995,2086,2087,2089,2703"/TCP6_OUT = "20,21,22,25,37,43,53,80,110,113,443,465,587,873,993,995,8080"/g' \
+    -e 's/DENY_TEMP_IP_LIMIT = "100"/DENY_TEMP_IP_LIMIT = "1000"/g' \
+    -e 's/SMTP_ALLOWUSER = "cpanel"/SMTP_ALLOWUSER = "root"/g' \
+    -e 's/PT_USERMEM = "200"/PT_USERMEM = "500"/g' \
+    -e 's/PT_USERTIME = "1800"/PT_USERTIME = "7200"/g' /etc/csf/csf.conf;
     echo "${OK}"
     # install sendmail as it's binary is required by CSF
     echo "${green}Installing Sendmail${normal} ... "
@@ -904,26 +904,26 @@ function _nosendmail() {
 function _locenhance() {
   if [[ $sitename -eq yes ]];then
     locconf1="include server.configs\/location\/cache-busting.conf;"
-    sed -i "s/locconf1/$locconf1/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/locconf1/$locconf1/g" /etc/nginx/conf.d/${sitename}.conf
     locconf2="include server.configs\/location\/cross-domain-fonts.conf;"
-    sed -i "s/locconf2/$locconf2/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/locconf2/$locconf2/g" /etc/nginx/conf.d/${sitename}.conf
     locconf3="include server.configs\/location\/expires.conf;"
-    sed -i "s/locconf3/$locconf3/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/locconf3/$locconf3/g" /etc/nginx/conf.d/${sitename}.conf
     locconf4="include server.configs\/location\/protect-system-files.conf;"
-    sed -i "s/locconf4/$locconf4/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/locconf4/$locconf4/g" /etc/nginx/conf.d/${sitename}.conf
     locconf5="include server.configs\/location\/letsencrypt.conf;"
-    sed -i "s/locconf5/$locconf5/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/locconf5/$locconf5/g" /etc/nginx/conf.d/${sitename}.conf
   else
     locconf1="include server.configs\/location\/cache-busting.conf;"
-    sed -i "s/locconf1/$locconf1/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/locconf1/$locconf1/g" /etc/nginx/conf.d/${hostname1}.conf
     locconf2="include server.configs\/location\/cross-domain-fonts.conf;"
-    sed -i "s/locconf2/$locconf2/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/locconf2/$locconf2/g" /etc/nginx/conf.d/${hostname1}.conf
     locconf3="include server.configs\/location\/expires.conf;"
-    sed -i "s/locconf3/$locconf3/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/locconf3/$locconf3/g" /etc/nginx/conf.d/${hostname1}.conf
     locconf4="include server.configs\/location\/protect-system-files.conf;"
-    sed -i "s/locconf4/$locconf4/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/locconf4/$locconf4/g" /etc/nginx/conf.d/${hostname1}.conf
     locconf5="include server.configs\/location\/letsencrypt.conf;"
-    sed -i "s/locconf5/$locconf5/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/locconf5/$locconf5/g" /etc/nginx/conf.d/${hostname1}.conf
   fi
   echo "${OK}"
 }
@@ -933,18 +933,18 @@ function _locenhance() {
 function _security() {
   if [[ $sitename -eq yes ]];then
     secconf1="include server.configs\/directives\/sec-bad-bots.conf;"
-    sed -i "s/secconf1/$secconf1/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/secconf1/$secconf1/g" /etc/nginx/conf.d/${sitename}.conf
     secconf2="include server.configs\/directives\/sec-file-injection.conf;"
-    sed -i "s/secconf2/$secconf2/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/secconf2/$secconf2/g" /etc/nginx/conf.d/${sitename}.conf
     secconf3="include server.configs\/directives\/sec-php-easter-eggs.conf;"
-    sed -i "s/secconf3/$secconf3/" /etc/nginx/conf.d/${sitename}.conf
+    sed -i "s/secconf3/$secconf3/g" /etc/nginx/conf.d/${sitename}.conf
   else
     secconf1="include server.configs\/directives\/sec-bad-bots.conf;"
-    sed -i "s/secconf1/$secconf1/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/secconf1/$secconf1/g" /etc/nginx/conf.d/${hostname1}.conf
     secconf2="include server.configs\/directives\/sec-file-injection.conf;"
-    sed -i "s/secconf2/$secconf2/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/secconf2/$secconf2/g" /etc/nginx/conf.d/${hostname1}.conf
     secconf3="include server.configs\/directives\/sec-php-easter-eggs.conf;"
-    sed -i "s/secconf3/$secconf3/" /etc/nginx/conf.d/${hostname1}.conf
+    sed -i "s/secconf3/$secconf3/g" /etc/nginx/conf.d/${hostname1}.conf
   fi
   echo "${OK}"
   echo
