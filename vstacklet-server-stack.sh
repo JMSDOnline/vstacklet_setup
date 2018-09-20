@@ -231,14 +231,14 @@ cat >/etc/apt/sources.list<<ABR
 
 
 ###### Ubuntu Main Repos
-deb http://us.archive.ubuntu.com/ubuntu/ $CODENAME main restricted universe 
-deb-src http://us.archive.ubuntu.com/ubuntu/ $CODENAME main restricted universe 
+deb http://us.archive.ubuntu.com/ubuntu/ $CODENAME main restricted universe
+deb-src http://us.archive.ubuntu.com/ubuntu/ $CODENAME main restricted universe
 
 ###### Ubuntu Update Repos
-deb http://us.archive.ubuntu.com/ubuntu/ $CODENAME-security main restricted universe 
-deb http://us.archive.ubuntu.com/ubuntu/ $CODENAME-updates main restricted universe 
-deb-src http://us.archive.ubuntu.com/ubuntu/ $CODENAME-security main restricted universe 
-deb-src http://us.archive.ubuntu.com/ubuntu/ $CODENAME-updates main restricted universe 
+deb http://us.archive.ubuntu.com/ubuntu/ $CODENAME-security main restricted universe
+deb http://us.archive.ubuntu.com/ubuntu/ $CODENAME-updates main restricted universe
+deb-src http://us.archive.ubuntu.com/ubuntu/ $CODENAME-security main restricted universe
+deb-src http://us.archive.ubuntu.com/ubuntu/ $CODENAME-updates main restricted universe
 ABR
   fi
   
@@ -403,11 +403,7 @@ function _askphpversion() {
 # install php function (11)
 function _php7() {
   echo -ne "Installing and Adjusting php${green}$PHPVERSION${normal}-fpm w/ OPCode Cache ... "
-  if [[ $CODENAME == bionic ]]; then
-    apt-get -y install php7.2 php7.2-fpm php7.2-mbstring php7.2-zip php7.2-mysql php7.2-curl php7.2-gd php7.2-json php7.2-opcache php7.2-xml >>"${OUTTO}" 2>&1;
-  else
-    apt-get -y install php7.2 php7.2-fpm php7.2-mbstring php7.2-zip php7.2-mysql php7.2-curl php7.2-gd php7.2-json php7.2-mcrypt php7.2-opcache php7.2-xml
-  fi
+  apt-get -y install php7.2 php7.2-fpm php7.2-mbstring php7.2-zip php7.2-mysql php7.2-curl php7.2-gd php7.2-json php7.2-opcache php7.2-xml >>"${OUTTO}" 2>&1;
   sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
   -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
   -e "s/expose_php = On/expose_php = Off/" \
