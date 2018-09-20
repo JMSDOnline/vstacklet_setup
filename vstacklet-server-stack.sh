@@ -300,7 +300,7 @@ function _keys() {
 # package and repo addition (d) _add respo sources_
 function _repos() {
   if [[ $DISTRO == Ubuntu ]]; then
-    # add php7.1 repo via ppa:ondrej
+    # add php7.2 repo via ppa:ondrej
     LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1;
     # use mariadb 10.2 repo
     cat >/etc/apt/sources.list.d/mariadb.list<<EOF
@@ -323,7 +323,7 @@ EOF
   fi
 
   if [[ $DISTRO == Debian ]]; then
-    # add php7.1 repo via dotdeb
+    # add php7.2 repo via dotdeb
     cat >/etc/apt/sources.list.d/dotdeb-php7-$(lsb_release -sc).list<<EOF
 deb http://packages.dotdeb.org $(lsb_release -sc) all
 deb-src http://packages.dotdeb.org $(lsb_release -sc) all
@@ -367,15 +367,15 @@ function _updates() {
 
 # ask php version function (12)
 function _askphpversion() {
-  echo -e "1) php${green}7.1${normal}"
+  echo -e "1) php${green}7.2${normal}"
   echo -e "2) php${green}5.6${normal}"
   echo -e "3) ${green}HHVM${normal}"
-  echo -ne "${yellow}What version of php do you want?${normal} (Default php${green}7.1${normal}): "; read version
+  echo -ne "${yellow}What version of php do you want?${normal} (Default php${green}7.2${normal}): "; read version
   case $version in
-    1 | "") PHPVERSION=7.1  ;;
+    1 | "") PHPVERSION=7.2  ;;
     2) PHPVERSION=5.6  ;;
     3) PHPVERSION=HHVM  ;;
-    *) PHPVERSION=7.1 ;;
+    *) PHPVERSION=7.2 ;;
   esac
   echo "Using $PHPVERSION for php"
   echo
@@ -384,7 +384,7 @@ function _askphpversion() {
 # install php function (11)
 function _php7() {
     echo -ne "Installing and Adjusting php${green}$PHPVERSION${normal}-fpm w/ OPCode Cache ... "
-    apt-get -y install php7.1 php7.1-fpm php7.1-mbstring php7.1-zip php7.1-mysql php7.1-curl php7.1-gd php7.1-json php7.1-mcrypt php7.1-opcache php7.1-xml >>"${OUTTO}" 2>&1;
+    apt-get -y install php7.2 php7.2-fpm php7.2-mbstring php7.2-zip php7.2-mysql php7.2-curl php7.2-gd php7.2-json php7.2-mcrypt php7.2-opcache php7.2-xml >>"${OUTTO}" 2>&1;
     sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
                -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
                -e "s/expose_php = On/expose_php = Off/" \
@@ -393,13 +393,22 @@ function _php7() {
                -e "s/;opcache.enable=0/opcache.enable=1/" \
                -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
                -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
-               -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.1/fpm/php.ini
+               -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.2/fpm/php.ini
+    sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/" \
+               -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/" \
+               -e "s/expose_php = On/expose_php = Off/" \
+               -e "s/128M/768M/" \
+               -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" \
+               -e "s/;opcache.enable=0/opcache.enable=1/" \
+               -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/" \
+               -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/" \
+               -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/" /etc/php/7.2/cli/php.ini
     # ensure opcache module is activated
-    phpenmod -v 7.1 opcache
+    phpenmod -v 7.2 opcache
     # ensure mcrypt module is activated
-    phpenmod -v 7.1 mcrypt
+    phpenmod -v 7.2 mcrypt
     # ensure xml module is activated
-    phpenmod -v 7.1 xml
+    phpenmod -v 7.2 xml
     echo "${OK}"
 }
 function _php5() {
@@ -451,7 +460,7 @@ function _nginx() {
   sh -c 'find /etc/nginx/cache -type d -print0 | sudo xargs -0 chmod g+s'
   # rename default.conf template
   if [[ $sitename -eq yes ]];then
-      if [[ "$PHPVERSION" = "7.1" ]];then
+      if [[ "$PHPVERSION" = "7.2" ]];then
           cp ${local_php7}nginx/conf.d/default.php7.conf.save /etc/nginx/conf.d/${sitename}.conf
           # build applications web root directory if sitename is provided
           mkdir -p /srv/www/${sitename}/{logs,ssl,public}
@@ -467,7 +476,7 @@ function _nginx() {
           mkdir -p /srv/www/${sitename}/{logs,ssl,public}
       fi
   else
-      if [[ "$PHPVERSION" = "7.1" ]];then
+      if [[ "$PHPVERSION" = "7.2" ]];then
           cp ${local_php7}nginx/conf.d/default.php7.conf.save /etc/nginx/conf.d/${hostname1}.conf
           # build applications web root directory if sitename is provided
           mkdir -p /srv/www/${hostname1}/{logs,ssl,public}
@@ -532,10 +541,10 @@ function _askmemcached() {
 function _memcached() {
     if [[ ${memcached} == "yes" ]]; then
         echo -n "Installing Memcached for PHP 7 ... "
-        apt-get -y install php7.1-dev git pkg-config build-essential libmemcached-dev >/dev/null 2>&1;
+        apt-get -y install php7.2-dev git pkg-config build-essential libmemcached-dev >/dev/null 2>&1;
         apt-get -y install php-memcached memcached >/dev/null 2>&1;
-        sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.1/fpm/conf.d/20-memcached.ini
-        sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.1/cli/conf.d/20-memcached.ini
+        sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.2/fpm/conf.d/20-memcached.ini
+        sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.2/cli/conf.d/20-memcached.ini
     fi
     echo "${OK}"
 }
@@ -1077,7 +1086,7 @@ _askcontinue;
 
 # Begin installer prompts
 _askphpversion;
-if [[ "$PHPVERSION" == "7.1" ]]; then
+if [[ "$PHPVERSION" == "7.2" ]]; then
     _askmemcached;
 fi
 if [[ "$PHPVERSION" == "5.6" ]]; then
@@ -1101,7 +1110,7 @@ echo -n "${bold}Adding trusted repositories${normal} ... ";_repos;
 _updates;
 
 #_askphpversion;
-if [[ "$PHPVERSION" == "7.1" ]]; then
+if [[ "$PHPVERSION" == "7.2" ]]; then
     _php7;
 fi
 if [[ "$PHPVERSION" == "5.6" ]]; then
@@ -1110,7 +1119,7 @@ fi
 if [[ "$PHPVERSION" == "HHVM" ]]; then
     _hhvm;
 fi
-#if [[ "$PHPVERSION" == "7.1" ]]; then
+#if [[ "$PHPVERSION" == "7.2" ]]; then
     #_askmemcached;
     if [[ ${memcached} == "yes" ]]; then
         _memcached;
