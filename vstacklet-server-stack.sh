@@ -961,7 +961,7 @@ function _askcert() {
 }
 
 function _cert() {
-  if [[ ${cert} == "yes" ]]; then
+  if [[ $cert == yes ]]; then
     if [[ $sitename -eq yes ]];then
       
       # Using Lets Encrypt for SSL deployment is currently being developed on VStacklet
