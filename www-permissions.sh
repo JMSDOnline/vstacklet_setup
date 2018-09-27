@@ -31,7 +31,7 @@ usermod -a -G www-pub $newuser
 
 # Change the ownership of everything under /var/www to root:www-pub
 
-chown root:www-pub -R /srv/www
+chown www-data:www-data -R /srv/www
 chmod 2775 /srv/www
 find /srv/www -type d -exec chmod 2775 {} +
 find /srv/www -type f -exec chmod 0664 {} +
