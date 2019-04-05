@@ -544,23 +544,41 @@ function _perms() {
   echo "${OK}"
 }
 
-# install varnish function (10)
+# install varnishd (10)
+function _askvarnish() {
+  echo -n "${bold}${yellow}Do you want to install Varnish?${normal} (${bold}${green}Y${normal}/n): "
+  read responce
+  case $responce in
+    [yY] | [yY][Ee][Ss] | "" ) varnish=yes ;;
+    [nN] | [nN][Oo] ) varnish=no ;;
+  esac
+}
+
 function _varnish() {
-  apt-get -y install varnish >>"${OUTTO}" 2>&1;
-  cd /etc/varnish
-  mv default.vcl default.vcl.ORIG
-  cp ${local_varnish}default.vcl.template /etc/varnish/default.vcl >/dev/null 2>&1;
-  cd
-  sed -i "s/127.0.0.1/${server_ip}/g" /etc/varnish/default.vcl
-  sed -i "s/6081/80/g" /etc/default/varnish
-  # then there is varnish with systemd in ubuntu 15.x
-  # let us shake that headache now
-  cp /lib/systemd/system/varnishlog.service /etc/systemd/system/
-  cp /lib/systemd/system/varnish.service /etc/systemd/system/
-  sed -i "s/6081/80/g" /etc/systemd/system/varnish.service
-  sed -i "s/6081/80/g" /lib/systemd/system/varnish.service
-  systemctl daemon-reload
-  echo "${OK}"
+  if [[ ${varnish} == "yes" ]]; then
+    echo -n "Installing Varnish ... "
+    apt-get -y install varnish >>"${OUTTO}" 2>&1;
+    cd /etc/varnish
+    mv default.vcl default.vcl.ORIG
+    cp ${local_varnish}default.vcl.template /etc/varnish/default.vcl >/dev/null 2>&1;
+    cd
+    sed -i "s/127.0.0.1/${server_ip}/g" /etc/varnish/default.vcl
+    sed -i "s/6081/80/g" /etc/default/varnish
+    # then there is varnish with systemd in ubuntu 15.x
+    # let us shake that headache now
+    cp /lib/systemd/system/varnishlog.service /etc/systemd/system/
+    cp /lib/systemd/system/varnish.service /etc/systemd/system/
+    sed -i "s/6081/80/g" /etc/systemd/system/varnish.service
+    sed -i "s/6081/80/g" /lib/systemd/system/varnish.service
+    systemctl daemon-reload
+    echo "${OK}"
+  fi
+}
+
+function _novarnish() {
+  if [[ ${varnish} == "no" ]]; then
+    echo "${cyan}Skipping Varnish Installation...${normal}"
+  fi
 }
 
 # install memcached for php7 function (12)
@@ -1120,6 +1138,7 @@ _bashrc;
 _askcontinue;
 
 # Begin installer prompts
+_askvarnish;
 _askphpversion;
 if [[ "$PHPVERSION" == "7.2" ]]; then
   _askmemcached;
@@ -1143,6 +1162,12 @@ echo -n "${bold}Installing: nano, unzip, dos2unix, htop, iotop, libwww-perl${nor
 echo -n "${bold}Installing signed keys for MariaDB, Nginx, PHP7, HHVM and Varnish${normal} ... ";_keys;
 echo -n "${bold}Adding trusted repositories${normal} ... ";_repos;
 _updates;
+
+if [[ ${varnish} == "yes" ]]; then
+  _varnish;
+  elif [[ ${varnish} == "no" ]]; then
+  _novarnish;
+fi
 
 #_askphpversion;
 if [[ "$PHPVERSION" == "7.2" ]]; then
@@ -1171,7 +1196,7 @@ fi
 #fi
 echo -n "${bold}Installing and Configuring Nginx${normal} ... ";_nginx;
 echo -n "${bold}Adjusting Permissions${normal} ... ";_perms;
-echo -n "${bold}Installing and Configuring Varnish${normal} ... ";_varnish;
+#echo -n "${bold}Installing and Configuring Varnish${normal} ... ";_varnish;
 #_askmariadb;
 if [[ ${mariadb} == "yes" ]]; then
   echo -n "${bold}Installing MariaDB Drop-in Replacement${normal} ... ";_mariadb;
