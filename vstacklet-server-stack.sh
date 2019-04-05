@@ -403,7 +403,8 @@ function _askphpversion() {
 # install php function (11)
 function _php7() {
   echo -ne "Installing and Adjusting php${green}$PHPVERSION${normal}-fpm w/ OPCode Cache ... "
-  apt-get -y install php7.2 php7.2-fpm php7.2-mbstring php7.2-zip php7.2-mysql php7.2-curl php7.2-gd php7.2-json php7.2-opcache php7.2-xml >>"${OUTTO}" 2>&1;
+  #apt-get -y install php7.2 php7.2-fpm php7.2-mbstring php7.2-zip php7.2-mysql php7.2-curl php7.2-gd php7.2-json php7.2-opcache php7.2-xml >>"${OUTTO}" 2>&1; 
+  apt-get -y install php7.2-fpm php7.2-zip php7.2-cgi php7.2-cli php7.2-common php7.2-curl php7.2-dev php7.2-gd php7.2-gmp php7.2-imap php7.2-intl php7.2-json php7.2-ldap php7.2-mbstring php7.2-mysql php7.2-opcache php7.2-pspell php7.2-readline php7.2-soap php7.2-xml >>"${OUTTO}" 2>&1; 
   sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/g" \
   -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/g" \
   -e "s/expose_php = On/expose_php = Off/g" \
@@ -428,6 +429,10 @@ function _php7() {
   #phpenmod -v 7.2 mcrypt
   # ensure xml module is activated
   phpenmod -v 7.2 xml
+  # ensure gmp module is activated
+  phpenmod -v 7.2 gmp
+  # ensure mbstring module is activated
+  phpenmod -v 7.2 mbstring
   # ensure mcrypt module is installed and activated
   printf "\n" | pecl install mcrypt-1.0.1 >/dev/null 2>&1
   
