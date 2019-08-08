@@ -43,7 +43,7 @@ function _intro() {
   echo
   echo "   ${title}              Heads Up!               ${normal} "
   echo "   ${message_title}  VStacklet works with the following  ${normal} "
-  echo "   ${message_title}  Ubuntu 16.04, 16.10 & Debian 8     ${normal} "
+  echo "   ${message_title}  Ubuntu 16.04, 18.04 & Debian 8     ${normal} "
   echo
   echo
   echo "${green}Checking distribution ...${normal}"
@@ -318,12 +318,12 @@ function _keys() {
 # package and repo addition (d) _add respo sources_
 function _repos() {
   if [[ $DISTRO == Ubuntu ]]; then
-    # add php7.2 repo via ppa:ondrej
+    # add php7.3 repo via ppa:ondrej
     LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1;
     # use mariadb 10.2 repo
     cat >/etc/apt/sources.list.d/mariadb.list<<EOF
-deb [arch=amd64,i386] http://mirrors.syringanetworks.net/mariadb/repo/10.2/ubuntu $(lsb_release -sc) main
-deb-src http://mirrors.syringanetworks.net/mariadb/repo/10.2/ubuntu/ $(lsb_release -sc) main
+deb [arch=amd64,i386] http://mirrors.syringanetworks.net/mariadb/repo/10.3/ubuntu $(lsb_release -sc) main
+deb-src http://mirrors.syringanetworks.net/mariadb/repo/10.3/ubuntu/ $(lsb_release -sc) main
 EOF
     # use the trusty branch to install varnish
     #    cat >/etc/apt/sources.list.d/varnish-cache.list<<EOF
@@ -342,7 +342,7 @@ EOF
   fi
   
   if [[ $DISTRO == Debian ]]; then
-    # add php7.2 repo via dotdeb
+    # add php7.3 repo via dotdeb
     cat >/etc/apt/sources.list.d/dotdeb-php7-$(lsb_release -sc).list<<EOF
 deb http://packages.dotdeb.org $(lsb_release -sc) all
 deb-src http://packages.dotdeb.org $(lsb_release -sc) all
@@ -351,8 +351,8 @@ EOF
     sudo apt-key add dotdeb.gpg >> /dev/null 2>&1
     # use mariadb 10.2 repo
     cat >/etc/apt/sources.list.d/mariadb.list<<EOF
-deb [arch=amd64,i386] http://mirrors.syringanetworks.net/mariadb/repo/10.2/debian $(lsb_release -sc) main
-deb-src http://mirrors.syringanetworks.net/mariadb/repo/10.2/debian/ $(lsb_release -sc) main
+deb [arch=amd64,i386] http://mirrors.syringanetworks.net/mariadb/repo/10.3/debian $(lsb_release -sc) main
+deb-src http://mirrors.syringanetworks.net/mariadb/repo/10.3/debian/ $(lsb_release -sc) main
 EOF
     # use the jessie branch to install varnish 4.1
     #    cat >/etc/apt/sources.list.d/varnish-cache.list<<EOF
@@ -386,15 +386,15 @@ function _updates() {
 
 # ask php version function (12)
 function _askphpversion() {
-  echo -e "1) php${green}7.2${normal}"
+  echo -e "1) php${green}7.3${normal}"
   echo -e "2) php${green}5.6${normal}"
   echo -e "3) ${green}HHVM${normal}"
-  echo -ne "${yellow}What version of php do you want?${normal} (Default php${green}7.2${normal}): "; read version
+  echo -ne "${yellow}What version of php do you want?${normal} (Default php${green}7.3${normal}): "; read version
   case $version in
-    1 | "") PHPVERSION=7.2  ;;
+    1 | "") PHPVERSION=7.3  ;;
     2) PHPVERSION=5.6  ;;
     3) PHPVERSION=HHVM  ;;
-    *) PHPVERSION=7.2 ;;
+    *) PHPVERSION=7.3 ;;
   esac
   echo "Using $PHPVERSION for php"
   echo
@@ -403,47 +403,64 @@ function _askphpversion() {
 # install php function (11)
 function _php7() {
   echo -ne "Installing and Adjusting php${green}$PHPVERSION${normal}-fpm w/ OPCode Cache ... "
-  #apt-get -y install php7.2 php7.2-fpm php7.2-mbstring php7.2-zip php7.2-mysql php7.2-curl php7.2-gd php7.2-json php7.2-opcache php7.2-xml >>"${OUTTO}" 2>&1; 
-  apt-get -y install php7.2-fpm php7.2-zip php7.2-cgi php7.2-cli php7.2-common php7.2-curl php7.2-dev php7.2-gd php7.2-gmp php7.2-imap php7.2-intl php7.2-json php7.2-ldap php7.2-mbstring php7.2-mysql php7.2-opcache php7.2-pspell php7.2-readline php7.2-soap php7.2-xml >>"${OUTTO}" 2>&1; 
-  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/g" \
-  -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/g" \
-  -e "s/expose_php = On/expose_php = Off/g" \
-  -e "s/128M/768M/g" \
-  -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" \
-  -e "s/;opcache.enable=0/opcache.enable=1/g" \
-  -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/g" \
-  -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/g" \
-  -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/g" /etc/php/7.2/fpm/php.ini
-  sed -i.bak -e "s/post_max_size = 8M/post_max_size = 64M/g" \
-  -e "s/upload_max_filesize = 2M/upload_max_filesize = 92M/g" \
-  -e "s/expose_php = On/expose_php = Off/g" \
-  -e "s/128M/768M/g" \
-  -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" \
-  -e "s/;opcache.enable=0/opcache.enable=1/g" \
-  -e "s/;opcache.memory_consumption=64/opcache.memory_consumption=128/g" \
-  -e "s/;opcache.max_accelerated_files=2000/opcache.max_accelerated_files=4000/g" \
-  -e "s/;opcache.revalidate_freq=2/opcache.revalidate_freq=240/g" /etc/php/7.2/cli/php.ini
-  # ensure opcache module is activated
-  phpenmod -v 7.2 opcache
-  # ensure mcrypt module is activated
-  #phpenmod -v 7.2 mcrypt
-  # ensure xml module is activated
-  phpenmod -v 7.2 xml
-  # ensure gmp module is activated
-  phpenmod -v 7.2 gmp
-  # ensure mbstring module is activated
-  phpenmod -v 7.2 mbstring
-  # ensure mcrypt module is installed and activated
-  printf "\n" | pecl install mcrypt-1.0.1 >/dev/null 2>&1
+  #apt-get -y install php7.3 php7.3-fpm php7.3-mbstring php7.3-zip php7.3-mysql php7.3-curl php7.3-gd php7.3-json php7.3-opcache php7.3-xml >>"${OUTTO}" 2>&1;
+  apt-get -y install php7.3-fpm php7.3-zip php7.3-cgi php7.3-cli php7.3-common php7.3-curl php7.3-dev php7.3-gd php7.3-gmp php7.3-imap php7.3-intl php7.3-json php7.3-ldap php7.3-mbstring php7.3-mysql php7.3-opcache php7.3-pspell php7.3-readline php7.3-soap php7.3-xml >>"${OUTTO}" 2>&1;
   
-  # add mcrypt.so to php cli and fpm
-  bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.2/cli/php.ini"
-  bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.2/fpm/php.ini"
+  pconfig=$(php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||")
+  ismcrypt=$(php --ini | grep "extension=mcrypt.so" $pconfig)
+  if [[ "$ismcrypt" != 'extension=mcrypt.so' ]]; then
+    printf "\n" | pecl uninstall channel://pecl.php.net/mcrypt-1.0.2 >/dev/null 2>&1
+    sleep 3
+    printf "\n" | pecl install channel://pecl.php.net/mcrypt-1.0.2 >/dev/null 2>&1
+    bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.3/cli/php.ini"
+    bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.3/fpm/php.ini"
+  else
+    _info "mcrypt.so extension already exist in php.ini ... [skipping]"
+  fi
   
   if [[ $memcached == yes ]]; then
-    sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.2/fpm/conf.d/20-memcached.ini
-    sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.2/cli/conf.d/20-memcached.ini
+    ln -nsf /etc/php/7.3/mods-available/memcached.ini /etc/php/7.3/fpm/conf.d/20-memcached.ini
+    ln -nsf /etc/php/7.3/mods-available/memcached.ini /etc/php/7.3/cli/conf.d/20-memcached.ini
+    
+    php73memcahced=$(dpkg --get-selections | grep php7.3-memcached)
+    
+    if [[ $php73memcahced != *php7.3-memcached* ]]; then
+      apt-get -y install --force-reinstall true php7.3-memcached >/dev/null 2>&1
+    else
+      :
+    fi
   fi
+  
+  sed -i.bak -e "s/post_max_size.*/post_max_size = 64M/" \
+  -e "s/upload_max_filesize.*/upload_max_filesize = 92M/" \
+  -e "s/expose_php.*/expose_php = Off/" \
+  -e "s/128M/768M/" \
+  -e "s/;cgi.fix_pathinfo.*/cgi.fix_pathinfo=1/" \
+  -e "s/;opcache.enable.*/opcache.enable=1/" \
+  -e "s/;opcache.memory_consumption.*/opcache.memory_consumption=128/" \
+  -e "s/;opcache.max_accelerated_files.*/opcache.max_accelerated_files=4000/" \
+  -e "s/;opcache.revalidate_freq.*/opcache.revalidate_freq=240/" /etc/php/7.3/fpm/php.ini
+  
+  sed -i.bak -e "s/post_max_size.*/post_max_size = 64M/" \
+  -e "s/upload_max_filesize.*/upload_max_filesize = 92M/" \
+  -e "s/expose_php.*/expose_php = Off/" \
+  -e "s/128M/768M/" \
+  -e "s/;cgi.fix_pathinfo.*/cgi.fix_pathinfo=1/" \
+  -e "s/;opcache.enable.*/opcache.enable=1/" \
+  -e "s/;opcache.memory_consumption.*/opcache.memory_consumption=128/" \
+  -e "s/;opcache.max_accelerated_files.*/opcache.max_accelerated_files=4000/" \
+  -e "s/;opcache.revalidate_freq.*/opcache.revalidate_freq=240/" /etc/php/7.3/cli/php.ini
+  
+  phpenmod -v 7.3 opcache
+  phpenmod -v 7.3 xml
+  phpenmod -v 7.3 mbstring
+  phpenmod -v 7.3 msgpack
+  phpenmod -v 7.3 memcached
+  
+  # add mcrypt.so to php cli and fpm
+  bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.3/cli/php.ini"
+  bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.3/fpm/php.ini"
+  
   echo "${OK}"
 }
 function _php5() {
@@ -495,7 +512,7 @@ function _nginx() {
   sh -c 'find /etc/nginx/cache -type d -print0 | sudo xargs -0 chmod g+s'
   # rename default.conf template
   if [[ $sitename -eq yes ]];then
-    if [[ "$PHPVERSION" = "7.2" ]];then
+    if [[ "$PHPVERSION" = "7.3" ]];then
       cp ${local_php7}nginx/conf.d/default.php7.conf.save /etc/nginx/conf.d/${sitename}.conf
       # build applications web root directory if sitename is provided
       mkdir -p /srv/www/${sitename}/{logs,ssl,public}
@@ -511,7 +528,7 @@ function _nginx() {
       mkdir -p /srv/www/${sitename}/{logs,ssl,public}
     fi
   else
-    if [[ "$PHPVERSION" = "7.2" ]];then
+    if [[ "$PHPVERSION" = "7.3" ]];then
       cp ${local_php7}nginx/conf.d/default.php7.conf.save /etc/nginx/conf.d/${hostname1}.conf
       # build applications web root directory if sitename is provided
       mkdir -p /srv/www/${hostname1}/{logs,ssl,public}
@@ -594,10 +611,10 @@ function _askmemcached() {
 function _memcached() {
   if [[ ${memcached} == "yes" ]]; then
     echo -n "Installing Memcached for PHP 7 ... "
-    apt-get -y install php7.2-dev git pkg-config build-essential libmemcached-dev >/dev/null 2>&1;
+    apt-get -y install php7.3-dev git pkg-config build-essential libmemcached-dev >/dev/null 2>&1;
     apt-get -y install php-memcached memcached >/dev/null 2>&1;
-    sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.2/fpm/conf.d/20-memcached.ini
-    sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.2/cli/conf.d/20-memcached.ini
+    sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.3/fpm/conf.d/20-memcached.ini
+    sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.3/cli/conf.d/20-memcached.ini
   fi
   echo "${OK}"
 }
@@ -1140,7 +1157,7 @@ _askcontinue;
 # Begin installer prompts
 _askvarnish;
 _askphpversion;
-if [[ "$PHPVERSION" == "7.2" ]]; then
+if [[ "$PHPVERSION" == "7.3" ]]; then
   _askmemcached;
 fi
 if [[ "$PHPVERSION" == "5.6" ]]; then
@@ -1170,7 +1187,7 @@ if [[ ${varnish} == "yes" ]]; then
 fi
 
 #_askphpversion;
-if [[ "$PHPVERSION" == "7.2" ]]; then
+if [[ "$PHPVERSION" == "7.3" ]]; then
   _php7;
 fi
 if [[ "$PHPVERSION" == "5.6" ]]; then
@@ -1179,7 +1196,7 @@ fi
 if [[ "$PHPVERSION" == "HHVM" ]]; then
   _hhvm;
 fi
-#if [[ "$PHPVERSION" == "7.2" ]]; then
+#if [[ "$PHPVERSION" == "7.3" ]]; then
 #_askmemcached;
 if [[ ${memcached} == "yes" ]]; then
   _memcached;
