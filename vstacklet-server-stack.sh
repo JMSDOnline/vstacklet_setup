@@ -318,7 +318,7 @@ function _keys() {
 # package and repo addition (d) _add respo sources_
 function _repos() {
   if [[ $DISTRO == Ubuntu ]]; then
-    # add php7.3 repo via ppa:ondrej
+    # add php7.4 repo via ppa:ondrej
     LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1;
     # use mariadb 10.2 repo
     cat >/etc/apt/sources.list.d/mariadb.list<<EOF
@@ -342,7 +342,7 @@ EOF
   fi
   
   if [[ $DISTRO == Debian ]]; then
-    # add php7.3 repo via dotdeb
+    # add php7.4 repo via dotdeb
     cat >/etc/apt/sources.list.d/dotdeb-php7-$(lsb_release -sc).list<<EOF
 deb http://packages.dotdeb.org $(lsb_release -sc) all
 deb-src http://packages.dotdeb.org $(lsb_release -sc) all
@@ -386,15 +386,15 @@ function _updates() {
 
 # ask php version function (12)
 function _askphpversion() {
-  echo -e "1) php${green}7.3${normal}"
+  echo -e "1) php${green}7.4${normal}"
   echo -e "2) php${green}5.6${normal}"
   echo -e "3) ${green}HHVM${normal}"
-  echo -ne "${yellow}What version of php do you want?${normal} (Default php${green}7.3${normal}): "; read version
+  echo -ne "${yellow}What version of php do you want?${normal} (Default php${green}7.4${normal}): "; read version
   case $version in
-    1 | "") PHPVERSION=7.3  ;;
+    1 | "") PHPVERSION=7.4  ;;
     2) PHPVERSION=5.6  ;;
     3) PHPVERSION=HHVM  ;;
-    *) PHPVERSION=7.3 ;;
+    *) PHPVERSION=7.4 ;;
   esac
   echo "Using $PHPVERSION for php"
   echo
@@ -403,29 +403,29 @@ function _askphpversion() {
 # install php function (11)
 function _php7() {
   echo -ne "Installing and Adjusting php${green}$PHPVERSION${normal}-fpm w/ OPCode Cache ... "
-  #apt-get -y install php7.3 php7.3-fpm php7.3-mbstring php7.3-zip php7.3-mysql php7.3-curl php7.3-gd php7.3-json php7.3-opcache php7.3-xml >>"${OUTTO}" 2>&1;
-  apt-get -y install php7.3-fpm php7.3-zip php7.3-cgi php7.3-cli php7.3-common php7.3-curl php7.3-dev php7.3-gd php7.3-gmp php7.3-imap php7.3-intl php7.3-json php7.3-ldap php7.3-mbstring php7.3-mysql php7.3-opcache php7.3-pspell php7.3-readline php7.3-soap php7.3-xml >>"${OUTTO}" 2>&1;
+  #apt-get -y install php7.4 php7.4-fpm php7.4-mbstring php7.4-zip php7.4-mysql php7.4-curl php7.4-gd php7.4-json php7.4-opcache php7.4-xml >>"${OUTTO}" 2>&1;
+  apt-get -y install php7.4-fpm php7.4-zip php7.4-cgi php7.4-cli php7.4-common php7.4-curl php7.4-dev php7.4-gd php7.4-gmp php7.4-imap php7.4-intl php7.4-json php7.4-ldap php7.4-mbstring php7.4-mysql php7.4-opcache php7.4-pspell php7.4-readline php7.4-soap php7.4-xml libmcrypt-dev libreadline-dev >>"${OUTTO}" 2>&1;
   
   pconfig=$(php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||")
   ismcrypt=$(php --ini | grep "extension=mcrypt.so" $pconfig)
   if [[ "$ismcrypt" != 'extension=mcrypt.so' ]]; then
     printf "\n" | pecl uninstall channel://pecl.php.net/mcrypt-1.0.2 >/dev/null 2>&1
     sleep 3
-    printf "\n" | pecl install channel://pecl.php.net/mcrypt-1.0.2 >/dev/null 2>&1
-    bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.3/cli/php.ini"
-    bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.3/fpm/php.ini"
+    printf "\n" | pecl install channel://pecl.php.net/mcrypt-* >/dev/null 2>&1
+    bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.4/cli/php.ini"
+    bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.4/fpm/php.ini"
   else
     _info "mcrypt.so extension already exist in php.ini ... [skipping]"
   fi
   
   if [[ $memcached == yes ]]; then
-    ln -nsf /etc/php/7.3/mods-available/memcached.ini /etc/php/7.3/fpm/conf.d/20-memcached.ini
-    ln -nsf /etc/php/7.3/mods-available/memcached.ini /etc/php/7.3/cli/conf.d/20-memcached.ini
+    ln -nsf /etc/php/7.4/mods-available/memcached.ini /etc/php/7.4/fpm/conf.d/20-memcached.ini
+    ln -nsf /etc/php/7.4/mods-available/memcached.ini /etc/php/7.4/cli/conf.d/20-memcached.ini
     
-    php73memcahced=$(dpkg --get-selections | grep php7.3-memcached)
+    php74memcahced=$(dpkg --get-selections | grep php7.4-memcached)
     
-    if [[ $php73memcahced != *php7.3-memcached* ]]; then
-      apt-get -y install --force-reinstall true php7.3-memcached >/dev/null 2>&1
+    if [[ $php74memcahced != *php7.4-memcached* ]]; then
+      apt-get -y install --force-reinstall true php7.4-memcached >/dev/null 2>&1
     else
       :
     fi
@@ -439,7 +439,7 @@ function _php7() {
   -e "s/;opcache.enable.*/opcache.enable=1/" \
   -e "s/;opcache.memory_consumption.*/opcache.memory_consumption=128/" \
   -e "s/;opcache.max_accelerated_files.*/opcache.max_accelerated_files=4000/" \
-  -e "s/;opcache.revalidate_freq.*/opcache.revalidate_freq=240/" /etc/php/7.3/fpm/php.ini
+  -e "s/;opcache.revalidate_freq.*/opcache.revalidate_freq=240/" /etc/php/7.4/fpm/php.ini
   
   sed -i.bak -e "s/post_max_size.*/post_max_size = 64M/" \
   -e "s/upload_max_filesize.*/upload_max_filesize = 92M/" \
@@ -449,17 +449,17 @@ function _php7() {
   -e "s/;opcache.enable.*/opcache.enable=1/" \
   -e "s/;opcache.memory_consumption.*/opcache.memory_consumption=128/" \
   -e "s/;opcache.max_accelerated_files.*/opcache.max_accelerated_files=4000/" \
-  -e "s/;opcache.revalidate_freq.*/opcache.revalidate_freq=240/" /etc/php/7.3/cli/php.ini
+  -e "s/;opcache.revalidate_freq.*/opcache.revalidate_freq=240/" /etc/php/7.4/cli/php.ini
   
-  phpenmod -v 7.3 opcache
-  phpenmod -v 7.3 xml
-  phpenmod -v 7.3 mbstring
-  phpenmod -v 7.3 msgpack
-  phpenmod -v 7.3 memcached
+  phpenmod -v 7.4 opcache
+  phpenmod -v 7.4 xml
+  phpenmod -v 7.4 mbstring
+  phpenmod -v 7.4 msgpack
+  phpenmod -v 7.4 memcached
   
   # add mcrypt.so to php cli and fpm
-  bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.3/cli/php.ini"
-  bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.3/fpm/php.ini"
+  #bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.4/cli/php.ini"
+  #bash -c "echo 'extension=mcrypt.so' >> /etc/php/7.4/fpm/php.ini"
   
   echo "${OK}"
 }
@@ -512,7 +512,7 @@ function _nginx() {
   sh -c 'find /etc/nginx/cache -type d -print0 | sudo xargs -0 chmod g+s'
   # rename default.conf template
   if [[ $sitename -eq yes ]];then
-    if [[ "$PHPVERSION" = "7.3" ]];then
+    if [[ "$PHPVERSION" = "7.4" ]];then
       cp ${local_php7}nginx/conf.d/default.php7.conf.save /etc/nginx/conf.d/${sitename}.conf
       # build applications web root directory if sitename is provided
       mkdir -p /srv/www/${sitename}/{logs,ssl,public}
@@ -528,7 +528,7 @@ function _nginx() {
       mkdir -p /srv/www/${sitename}/{logs,ssl,public}
     fi
   else
-    if [[ "$PHPVERSION" = "7.3" ]];then
+    if [[ "$PHPVERSION" = "7.4" ]];then
       cp ${local_php7}nginx/conf.d/default.php7.conf.save /etc/nginx/conf.d/${hostname1}.conf
       # build applications web root directory if sitename is provided
       mkdir -p /srv/www/${hostname1}/{logs,ssl,public}
@@ -611,10 +611,10 @@ function _askmemcached() {
 function _memcached() {
   if [[ ${memcached} == "yes" ]]; then
     echo -n "Installing Memcached for PHP 7 ... "
-    apt-get -y install php7.3-dev git pkg-config build-essential libmemcached-dev >/dev/null 2>&1;
+    apt-get -y install php7.4-dev git pkg-config build-essential libmemcached-dev >/dev/null 2>&1;
     apt-get -y install php-memcached memcached >/dev/null 2>&1;
-    sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.3/fpm/conf.d/20-memcached.ini
-    sudo ln -s /etc/php/mods-available/memcached.ini /etc/php/7.3/cli/conf.d/20-memcached.ini
+    sudo ln -s /etc/php/7.4/mods-available/memcached.ini /etc/php/7.4/fpm/conf.d/20-memcached.ini
+    sudo ln -s /etc/php/7.4/mods-available/memcached.ini /etc/php/7.4/cli/conf.d/20-memcached.ini
   fi
   echo "${OK}"
 }
@@ -1157,7 +1157,7 @@ _askcontinue;
 # Begin installer prompts
 _askvarnish;
 _askphpversion;
-if [[ "$PHPVERSION" == "7.3" ]]; then
+if [[ "$PHPVERSION" == "7.4" ]]; then
   _askmemcached;
 fi
 if [[ "$PHPVERSION" == "5.6" ]]; then
@@ -1187,7 +1187,7 @@ if [[ ${varnish} == "yes" ]]; then
 fi
 
 #_askphpversion;
-if [[ "$PHPVERSION" == "7.3" ]]; then
+if [[ "$PHPVERSION" == "7.4" ]]; then
   _php7;
 fi
 if [[ "$PHPVERSION" == "5.6" ]]; then
@@ -1196,7 +1196,7 @@ fi
 if [[ "$PHPVERSION" == "HHVM" ]]; then
   _hhvm;
 fi
-#if [[ "$PHPVERSION" == "7.3" ]]; then
+#if [[ "$PHPVERSION" == "7.4" ]]; then
 #_askmemcached;
 if [[ ${memcached} == "yes" ]]; then
   _memcached;
