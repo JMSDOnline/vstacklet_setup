@@ -1196,7 +1196,7 @@ fi
 if [[ "$PHPVERSION" == "HHVM" ]]; then
   _hhvm;
 fi
-#if [[ "$PHPVERSION" == "7.3" ]]; then
+#if [[ "$PHPVERSION" == "7.4" ]]; then
 #_askmemcached;
 if [[ ${memcached} == "yes" ]]; then
   _memcached;
