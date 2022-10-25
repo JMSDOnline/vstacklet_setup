@@ -57,20 +57,16 @@ function _intro() {
 	echo
 	echo "${green}Checking distribution ...${normal}"
 	if [[ ! -x /usr/bin/lsb_release ]]; then
-		echo "It looks like you are running ${DISTRO}, which is not supported by vstacklet."
-		echo "Exiting..."
+		_error "It looks like you are running ${DISTRO}, which is not supported by vstacklet. Exiting..."
 		exit 1
 	fi
 	echo "$(lsb_release -a)"
 	echo
 	if [[ ! ${DISTRO} =~ ("Ubuntu"|"Debian") ]]; then
-		echo "${DISTRO}: ${alert} It looks like you are running ${DISTRO}, which is not supported by vstacklet ${normal} "
-		echo 'Exiting...'
+		_error "[Detected OS: ${DISTRO}] ${alert} It looks like you are running ${DISTRO}, which is not supported by vstacklet. Exiting... ${normal}"
 		exit 1
 	elif [[ ! ${CODENAME} =~ ("bionic"|"focal"|"jessie"|"buster"|"bullseye") ]]; then
-		echo "Oh drats! You do not appear to be running a supported ${DISTRO} release."
-		echo "${bold}${SETNAME}${normal}"
-		echo 'Exiting...'
+		_error "[Detected Distro: ${CODENAME}] ${alert} You do not appear to be running a supported ${DISTRO} release. Exiting... ${normal}"
 		exit 1
 	fi
 }
@@ -78,8 +74,7 @@ function _intro() {
 # check if root function (2)
 function _checkroot() {
 	if [[ ${EUID} != 0 ]]; then
-		echo 'This script must be run with root privileges.'
-		echo 'Exiting...'
+		_error 'This script must be run with root privileges. Exiting... '
 		exit 1
 	fi
 	echo "${green}Congrats! You're running as root. Let's continue${normal} ... "
@@ -594,10 +589,10 @@ function _varnish() {
 	if [[ ${varnish} == "yes" ]]; then
 		echo -n "Installing Varnish ... "
 		apt-get -y install varnish >>"${OUTTO}" 2>&1
-		cd /etc/varnish || echo "Error: /etc/varnish does not exist" && exit 1
+		cd /etc/varnish || _error "/etc/varnish does not exist" && exit 1
 		mv default.vcl default.vcl.ORIG
 		\cp -f "${local_varnish}default.vcl.template" "/etc/varnish/default.vcl" >/dev/null 2>&1
-		cd || echo "Error: unable to change directory" && exit 1
+		cd || _error "unable to change directory" && exit 1
 		sed -i "s/127.0.0.1/${server_ip}/g" "/etc/varnish/default.vcl"
 		sed -i "s/6081/80/g" "/etc/default/varnish"
 		# then there is varnish with systemd in ubuntu 15.x
@@ -663,16 +658,16 @@ function _askioncube() {
 function _ioncube() {
 	if [[ ${ioncube} == "yes" ]]; then
 		echo -n "${green}Installing IonCube Loader${normal} ... "
-		mkdir tmp 2>&1
-		cd tmp || echo "Error: Could not change directory to tmp" && exit 1
+		mkdir -p /tmp 2>&1
+		cd /tmp || _error "Could not change directory to /tmp" && exit 1
 		wget http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz >/dev/null 2>&1
 		tar xvfz ioncube_loaders_lin_x86-64.tar.gz >/dev/null 2>&1
-		cd ioncube || echo "Error: ioncube directory not found" >/dev/null 2>&1
+		cd ioncube || _error "ioncube directory not found" && exit 1
 		cp ioncube_loader_lin_5.6.so /usr/lib/php/20131226/ >/dev/null 2>&1
 		echo -e "zend_extension = /usr/lib/php/20131226/ioncube_loader_lin_5.6.so" >/etc/php/5.6/fpm/conf.d/20-ioncube.ini
 		echo "zend_extension = /usr/lib/php/20131226/ioncube_loader_lin_5.6.so" >>/etc/php/5.6/fpm/php.ini
-		cd || echo "Error: unable to change directory" >/dev/null 2>&1
-		rm -rf tmp*
+		cd || _error "unable to change directory" && exit 1
+		rm -rf /tmp/*
 		echo "${OK}"
 	fi
 }
@@ -728,9 +723,9 @@ function _askphpmyadmin() {
 function _phpmyadmin() {
 	if [[ ${phpmyadmin} == "yes" ]]; then
 		# generate random passwords for the MySql root user
-		pmapass=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)
-		mysqlpass=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)
-		pma_bf=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 31)
+		pmapass="$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)"
+		mysqlpass="$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)"
+		pma_bf="$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 31)"
 		mysqladmin -u root -h localhost password "${mysqlpass}"
 		echo -n "${bold}Installing MySQL with user:${normal} ${bold}${green}root${normal}${bold} / passwd:${normal} ${bold}${green}${mysqlpass}${normal} ... "
 		apt-get -y install debconf-utils >>"${OUTTO}" 2>&1
@@ -742,14 +737,14 @@ function _phpmyadmin() {
 		echo "phpmyadmin phpmyadmin/app-password-confirm password ${pmapass}" | debconf-set-selections
 		echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect none" | debconf-set-selections
 		apt-get -y install phpmyadmin >>"${OUTTO}" 2>&1
-		cd /usr/share || echo "Error: Unable to move to /usr/share"
+		cd /usr/share || _error "unable to move to /usr/share"
 		rm -rf phpmyadmin
 		PMA_VERSION=$(curl -i -s https://www.phpmyadmin.net/downloads/ | grep -Eo "phpMyAdmin-.*" | grep -Eo "[0-9.]+" | head -n1)
 		wget -q -P /usr/share/ "https://files.phpmyadmin.net/phpMyAdmin/${PMA_VERSION}/phpMyAdmin-${PMA_VERSION}-all-languages.zip"
 		unzip "phpMyAdmin-${PMA_VERSION}-all-languages.zip" >/dev/null 2>&1
 		cp -r "phpMyAdmin-${PMA_VERSION}-all-languages" phpmyadmin
 		rm -rf "phpMyAdmin-${PMA_VERSION}-all-languages"*
-		cd /usr/share/phpmyadmin || echo "Error: Unable to move to /usr/share/phpmyadmin"
+		cd /usr/share/phpmyadmin || _error "unable to move to /usr/share/phpmyadmin"
 		cp config.sample.inc.php config.inc.php
 		sed -i "s/\$cfg\['blowfish_secret'\] = .*;/\$cfg\['blowfish_secret'\] = '${pma_bf}';/g" /usr/share/phpmyadmin/config.inc.php
 		mkdir tmp && chown -R www-data:www-data /usr/share/phpmyadmin/tmp
@@ -824,12 +819,13 @@ function _askcsf() {
 function _csf() {
 	if [[ ${csf} == "yes" ]]; then
 		echo -n "${green}Installing and Adjusting CSF${normal} ... "
+		cd || _error "could not change directory to ${HOME}"
 		apt-get -y install e2fsprogs >/dev/null 2>&1
 		wget https://download.configserver.com/csf.tgz
 		#wget http://www.configserver.com/free/csf.tgz >/dev/null 2>&1;
 		tar -xzf csf.tgz >/dev/null 2>&1
 		ufw disable >>"${OUTTO}" 2>&1
-		cd csf || echo "Error: Could not change directory to csf" && exit 1
+		cd csf || _error "could not change directory to ${HOME}/csf" && exit 1
 		sh install.sh >>"${OUTTO}" 2>&1
 		perl /usr/local/csf/bin/csftest.pl >>"${OUTTO}" 2>&1
 		# modify csf blocklists - essentially like CloudFlare, but on your machine
@@ -883,8 +879,8 @@ function _csf() {
 		echo "${OK}"
 		# install sendmail as it's binary is required by CSF
 		echo "${green}Installing Sendmail${normal} ... "
-		apt-get -y install sendmail >>"${OUTTO}" 2>&1
-		export DEBIAN_FRONTEND=noninteractive /usr/sbin/sendmailconfig >>"${OUTTO}" 2>&1
+		apt-get -y install sendmail >>"${OUTTO}" 2>&1 || _error "could not install sendmail" && exit 1
+		export DEBIAN_FRONTEND=noninteractive /usr/sbin/sendmailconfig >>"${OUTTO}" 2>&1 || _error "could not configure sendmail" && exit 1
 		# add administrator email
 		echo "${magenta}${bold}Add an Administrator Email Below for Aliases Inclusion${normal}"
 		read -rp "${bold}Email: ${normal}" admin_email
@@ -902,7 +898,7 @@ www: root
 ftp: root
 abuse: root
         root: ${admin_email}" >/etc/aliases
-		newaliases >>"${OUTTO}" 2>&1
+		newaliases >>"${OUTTO}" 2>&1 || _error "could not issue 'newaliases' command" && exit 1
 		echo "${OK}"
 	fi
 }
@@ -976,7 +972,7 @@ function _asksendmail() {
 function _sendmail() {
 	if [[ ${sendmail} == "yes" ]]; then
 		echo "${green}Installing Sendmail ... ${normal}"
-		apt-get -y install sendmail >>"${OUTTO}" 2>&1
+		apt-get -y install sendmail >>"${OUTTO}" 2>&1 || _error "could not install sendmail" && exit 1
 		export DEBIAN_FRONTEND=noninteractive | /usr/sbin/sendmailconfig >>"${OUTTO}" 2>&1
 		# add administrator email
 		echo "${magenta}Add an Administrator Email Below for Aliases Inclusion${normal}"
@@ -996,7 +992,7 @@ www: root
 ftp: root
 abuse: root
         root: ${admin_email}" >/etc/aliases
-		newaliases >>"${OUTTO}" 2>&1
+		newaliases >>"${OUTTO}" 2>&1 || _error "could not issue 'newaliases' command" && exit 1
 		echo "${OK}"
 	fi
 }
@@ -1123,19 +1119,9 @@ function _nocert() {
 	#  if [[ ${cert} == "no" ]]; then
 	if [[ ${sitename} == "yes" ]]; then
 		sed -i "s/sitename/${site_path}/g" "/etc/nginx/conf.d/${site_path}.conf"
-		#sed -i "s/sitename.crt/${site_path}_access/" /etc/nginx/conf.d/${site_path}.conf
-		#sed -i "s/sitename.key/${site_path}_error/" /etc/nginx/conf.d/${site_path}.conf
-		#sed -i "s/sitename.crt/${site_path}.crt/" /etc/nginx/conf.d/${site_path}.conf
-		#sed -i "s/sitename.key/${site_path}.key/" /etc/nginx/conf.d/${site_path}.conf
 	else
 		sed -i "s/sitename/${hostname1}/g" "/etc/nginx/conf.d/${hostname1}.conf"
-		#sed -i "s/sitename.crt/${hostname1}_access/" /etc/nginx/conf.d/${hostname1}.conf
-		#sed -i "s/sitename.key/${hostname1}_error/" /etc/nginx/conf.d/${hostname1}.conf
-		#sed -i "s/sitename.crt/${hostname1}.crt/" /etc/nginx/conf.d/${hostname1}.conf
-		#sed -i "s/sitename.key/${hostname1}.key/" /etc/nginx/conf.d/${hostname1}.conf
 	fi
-	#    echo "${cyan}Skipping SSL Certificate Creation...${normal}"
-	#  fi
 }
 
 # finalize and restart services function (20)
@@ -1195,21 +1181,15 @@ function _finished() {
 
 clear
 
-spinner() {
-	local pid=$1
-	local delay=0.25
-	# shellcheck disable=SC2034,SC1003,SC2086,SC2312
-	local spinstr='|/-\' # / = forward slash, \ = backslash
+S=$(date +%s)
+OK=$(echo -e "[ ${bold}${green}DONE${normal} ]")
 
-	while "$(ps a -o pid | awk '{ print $1 }' | grep "${pid}")"; do
-		local temp=${spinstr#?}
-		printf " [${bold}${yellow}%c${normal}]  " "${spinstr}"
-		local spinstr=${temp}${spinstr%"${temp}"}
-		sleep "${delay}"
-		printf "\b\b\b\b\b\b"
-	done
-	printf "    \b\b\b\b"
-	echo -ne "${OK}"
+_warn() {
+	echo "${bold}${red}WARNING: ${normal}${bold}$1${normal}"
+}
+
+_error() {
+	echo "${bold}${red}ERROR: ${normal}${bold}$1${normal}"
 }
 
 local_setup=/etc/vstacklet/setup/
@@ -1218,9 +1198,6 @@ local_php5=/etc/vstacklet/php5/
 local_hhvm=/etc/vstacklet/hhvm/
 local_nginx=/etc/vstacklet/nginx/
 local_varnish=/etc/vstacklet/varnish/
-
-S=$(date +%s)
-OK=$(echo -e "[ ${bold}${green}DONE${normal} ]")
 
 # VSTACKLET STRUCTURE
 _intro
@@ -1235,7 +1212,6 @@ elif [[ ${sitename} == no ]]; then
 fi
 _bashrc
 _askcontinue
-
 # Begin installer prompts
 _askvarnish
 _askphpversion
@@ -1254,21 +1230,17 @@ fi
 if [[ ${csf} == "no" ]]; then
 	_asksendmail
 fi
-
 #_locale;
 echo -n "${bold}Installing Common Software Properties${normal} ... " && _softcommon
 echo -n "${bold}Installing: nano, unzip, dos2unix, htop, iotop, libwww-perl${normal} ... " && _depends
 echo -n "${bold}Installing signed keys for MariaDB, Nginx, PHP, HHVM and Varnish${normal} ... " && _keys
 echo -n "${bold}Adding trusted repositories${normal} ... " && _repos
 _updates
-
 if [[ ${varnish} == "yes" ]]; then
 	_varnish
 elif [[ ${varnish} == "no" ]]; then
 	_novarnish
 fi
-
-#_askphpversion;
 if [[ ${PHPVERSION} == "8.1" ]]; then
 	_php8
 fi
@@ -1278,32 +1250,24 @@ fi
 if [[ ${PHPVERSION} == "HHVM" ]]; then
 	_hhvm
 fi
-#if [[ "${PHPVERSION}" == "8.1" ]]; then
-#_askmemcached;
 if [[ ${memcached} == "yes" ]]; then
 	_memcached
 elif [[ ${memcached} == "no" ]]; then
 	_nomemcached
 fi
-#fi
-#if [[ "${PHPVERSION}" == "5.6" ]]; then
-#_askioncube;
 if [[ ${ioncube} == "yes" ]]; then
 	_ioncube
 elif [[ ${ioncube} == "no" ]]; then
 	_noioncube
 fi
-#fi
 echo -n "${bold}Installing and Configuring Nginx${normal} ... " && _nginx
 echo -n "${bold}Adjusting Permissions${normal} ... " && _perms
 #echo -n "${bold}Installing and Configuring Varnish${normal} ... ";_varnish;
-#_askmariadb;
 if [[ ${mariadb} == "yes" ]]; then
 	echo -n "${bold}Installing MariaDB Drop-in Replacement${normal} ... " && _mariadb
 elif [[ ${mariadb} == "no" ]]; then
 	_nomariadb
 fi
-#_askphpmyadmin;
 if [[ ${phpmyadmin} == "yes" ]]; then
 	_phpmyadmin
 elif [[ ${phpmyadmin} == "no" ]]; then
@@ -1315,20 +1279,14 @@ if [[ ${csf} == "yes" ]]; then
 elif [[ ${csf} == "no" ]]; then
 	_nocsf
 fi
-#if [[ ${csf} == "yes" ]]; then
-#_askcloudflare;
 if [[ ${cloudflare} == "yes" ]]; then
 	_cloudflare
 fi
-#fi
-#if [[ ${csf} == "no" ]]; then
-#_asksendmail;
 if [[ ${sendmail} == "yes" ]]; then
 	_sendmail
 elif [[ ${sendmail} == "no" ]]; then
 	_nosendmail
 fi
-#fi
 echo "${bold}Addressing Location Edits: cache busting, cross domain font support,${normal}"
 echo -n "${bold}expires tags, and system file protection${normal} ... " && _locenhance
 echo "${bold}Performing Security Enhancements: protecting against bad bots,${normal}"
@@ -1340,7 +1298,6 @@ echo -n "${bold}file injection, and php easter eggs${normal} ... " && _security
 _nocert
 #fi
 echo -n "${bold}Completing Installation & Restarting Services${normal} ... " && _services
-
 E=$(date +%s)
 DIFF=$(echo "${E}" - "${S}" | bc)
 FIN=$(echo "${DIFF}" / 60 | bc)
