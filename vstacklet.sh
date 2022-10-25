@@ -26,6 +26,12 @@ elif [[ -f "/etc/debian_version" ]]; then
 fi
 #################################################################################
 
+# Set TERM to ~/.bashrc
+if ! grep -q "export TERM=xterm" /root/.bashrc; then
+	echo "export TERM=xterm" >>/root/.bashrc
+	source /root/.bashrc
+fi
+
 # Create vstacklet & backup directory strucutre
 mkdir -p /backup/{directories,databases}
 
