@@ -143,16 +143,16 @@ function _asksitename() {
 	[nN] | [nN][Oo]) sitename=no ;;
 	*)
 		echo "Invalid input, defaulting to yes"
-		sitename=yes
+		_asksitename
 		;;
 	esac
 }
 
 function _sitename() {
 	if [[ ${sitename} == yes ]]; then
-		read -rp "${bold}Name for your main websites root directory ${normal} : " sitename
+		read -rp "${bold}Name for your main websites root directory ${normal} : " site_path
 		echo
-		echo "Your website directory has been set to /srv/www/${green}${bold}${sitename}${normal}/public/"
+		echo "Your website directory has been set to /srv/www/${green}${bold}${site_path}${normal}/public/"
 		echo
 	fi
 }
@@ -168,7 +168,7 @@ function _nositename() {
 function _bashrc() {
 	cp "${local_setup}templates/bashrc.template" /root/.bashrc
 	if [[ ${sitename} == "yes" ]]; then
-		sed -i "s/HOSTNAME/${sitename}/g" /root/.bashrc
+		sed -i "s/HOSTNAME/${site_path}/g" /root/.bashrc
 	else
 		sed -i "s/HOSTNAME/${hostname1}/g" /root/.bashrc
 	fi
@@ -543,7 +543,7 @@ function _nginx() {
 	service nginx stop >>"${OUTTO}" 2>&1
 	mv /etc/nginx /etc/nginx-previous
 	rsync -aP --exclude=/pagespeed --exclude=LICENSE --exclude=README --exclude=.git "${local_nginx}"* /etc/nginx >>"${OUTTO}" 2>&1
-	cp /etc/nginx-previous/uwsgi_params /etc/nginx-previous/fastcgi_params /etc/nginx >>"${OUTTO}" 2>&1
+	\cp -rf /etc/nginx-previous/uwsgi_params /etc/nginx-previous/fastcgi_params /etc/nginx >>"${OUTTO}" 2>&1
 	mkdir -p /etc/nginx/{conf.d,cache}
 	chown -R www-data /etc/nginx/cache
 	chgrp -R www-data /etc/nginx/cache
@@ -552,19 +552,19 @@ function _nginx() {
 	# rename default.conf template
 	if [[ ${sitename} == "yes" ]]; then
 		if [[ ${PHPVERSION} == "8.1" ]]; then
-			cp "${local_php8}nginx/conf.d/default.php8.conf.save" "/etc/nginx/conf.d/${sitename}.conf"
+			cp "${local_php8}nginx/conf.d/default.php8.conf.save" "/etc/nginx/conf.d/${site_path}.conf"
 			# build applications web root directory if sitename is provided
-			mkdir -p "/srv/www/${sitename}"/{logs,ssl,public}
+			mkdir -p "/srv/www/${site_path}"/{logs,ssl,public}
 		fi
 		if [[ ${PHPVERSION} == "5.6" ]]; then
-			cp "${local_php5}nginx/conf.d/default.php5.conf.save" "/etc/nginx/conf.d/${sitename}.conf"
+			cp "${local_php5}nginx/conf.d/default.php5.conf.save" "/etc/nginx/conf.d/${site_path}.conf"
 			# build applications web root directory if sitename is provided
-			mkdir -p "/srv/www/${sitename}"/{logs,ssl,public}
+			mkdir -p "/srv/www/${site_path}"/{logs,ssl,public}
 		fi
 		if [[ ${PHPVERSION} == "HHVM" ]]; then
-			cp "${local_hhvm}nginx/conf.d/default.hhvm.conf.save" "/etc/nginx/conf.d/${sitename}.conf"
+			cp "${local_hhvm}nginx/conf.d/default.hhvm.conf.save" "/etc/nginx/conf.d/${site_path}.conf"
 			# build applications web root directory if sitename is provided
-			mkdir -p "/srv/www/${sitename}"/{logs,ssl,public}
+			mkdir -p "/srv/www/${site_path}"/{logs,ssl,public}
 		fi
 	else
 		if [[ ${PHPVERSION} == "8.1" ]]; then
@@ -585,7 +585,7 @@ function _nginx() {
 	fi
 	# write checkinfo for php verification
 	if [[ ${sitename} == "yes" ]]; then
-		echo '<?php phpinfo(); ?>' >"/srv/www/${sitename}/public/checkinfo.php"
+		echo '<?php phpinfo(); ?>' >"/srv/www/${site_path}/public/checkinfo.php"
 	else
 		echo '<?php phpinfo(); ?>' >"/srv/www/${hostname1}/public/checkinfo.php"
 	fi
@@ -767,7 +767,7 @@ function _phpmyadmin() {
 		apt-get -y install phpmyadmin >>"${OUTTO}" 2>&1
 		if [[ ${sitename} == "yes" ]]; then
 			# create a sym-link to live directory.
-			ln -s /usr/share/phpmyadmin "/srv/www/${sitename}/public"
+			ln -s /usr/share/phpmyadmin "/srv/www/${site_path}/public"
 		else
 			# create a sym-link to live directory.
 			ln -s /usr/share/phpmyadmin "/srv/www/${hostname1}/public"
@@ -1024,15 +1024,15 @@ function _nosendmail() {
 function _locenhance() {
 	if [[ ${sitename} == "yes" ]]; then
 		locconf1="include server.configs\/location\/cache-busting.conf;"
-		sed -i "s/locconf1/${locconf1}/g" "/etc/nginx/conf.d/${sitename}.conf"
+		sed -i "s/locconf1/${locconf1}/g" "/etc/nginx/conf.d/${site_path}.conf"
 		locconf2="include server.configs\/location\/cross-domain-fonts.conf;"
-		sed -i "s/locconf2/${locconf2}/g" "/etc/nginx/conf.d/${sitename}.conf"
+		sed -i "s/locconf2/${locconf2}/g" "/etc/nginx/conf.d/${site_path}.conf"
 		locconf3="include server.configs\/location\/expires.conf;"
-		sed -i "s/locconf3/${locconf3}/g" "/etc/nginx/conf.d/${sitename}.conf"
+		sed -i "s/locconf3/${locconf3}/g" "/etc/nginx/conf.d/${site_path}.conf"
 		locconf4="include server.configs\/location\/protect-system-files.conf;"
-		sed -i "s/locconf4/${locconf4}/g" "/etc/nginx/conf.d/${sitename}.conf"
+		sed -i "s/locconf4/${locconf4}/g" "/etc/nginx/conf.d/${site_path}.conf"
 		locconf5="include server.configs\/location\/letsencrypt.conf;"
-		sed -i "s/locconf5/${locconf5}/g" "/etc/nginx/conf.d/${sitename}.conf"
+		sed -i "s/locconf5/${locconf5}/g" "/etc/nginx/conf.d/${site_path}.conf"
 	else
 		locconf1="include server.configs\/location\/cache-busting.conf;"
 		sed -i "s/locconf1/${locconf1}/g" "/etc/nginx/conf.d/${hostname1}.conf"
@@ -1053,11 +1053,11 @@ function _locenhance() {
 function _security() {
 	if [[ ${sitename} == "yes" ]]; then
 		secconf1="include server.configs\/directives\/sec-bad-bots.conf;"
-		sed -i "s/secconf1/${secconf1}/g" "/etc/nginx/conf.d/${sitename}.conf"
+		sed -i "s/secconf1/${secconf1}/g" "/etc/nginx/conf.d/${site_path}.conf"
 		secconf2="include server.configs\/directives\/sec-file-injection.conf;"
-		sed -i "s/secconf2/${secconf2}/g" "/etc/nginx/conf.d/${sitename}.conf"
+		sed -i "s/secconf2/${secconf2}/g" "/etc/nginx/conf.d/${site_path}.conf"
 		secconf3="include server.configs\/directives\/sec-php-easter-eggs.conf;"
-		sed -i "s/secconf3/${secconf3}/g" "/etc/nginx/conf.d/${sitename}.conf"
+		sed -i "s/secconf3/${secconf3}/g" "/etc/nginx/conf.d/${site_path}.conf"
 	else
 		secconf1="include server.configs\/directives\/sec-bad-bots.conf;"
 		sed -i "s/secconf1/${secconf1}/g" "/etc/nginx/conf.d/${hostname1}.conf"
@@ -1089,18 +1089,18 @@ function _cert() {
 		if [[ ${sitename} == "yes" ]]; then
 			# Using Lets Encrypt for SSL deployment is currently being developed on VStacklet
 			#git clone https://github.com/letsencrypt/letsencrypt /opt/letsencrypt
-			openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "/srv/www/${sitename}/ssl/${sitename}.key" -out "/srv/www/${sitename}/ssl/${sitename}.crt"
-			chmod 400 "/etc/ssl/private/${sitename}.key"
+			openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "/srv/www/${site_path}/ssl/${site_path}.key" -out "/srv/www/${site_path}/ssl/${site_path}.crt"
+			chmod 400 "/etc/ssl/private/${site_path}.key"
 			sed -i -e "s/# listen [::]:443 ssl http2;/listen [::]:443 ssl http2;/g" \
 				-e "s/# listen *:443 ssl http2;/listen *:443 ssl http2;/g" \
 				-e "s/# include vstacklet\/directive-only\/ssl.conf;/include vstacklet\/directive-only\/ssl.conf;/g" \
-				-e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/${sitename}\/ssl\/${sitename}.crt;/g" \
-				-e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/${sitename}\/ssl\/${sitename}.key;/g" "/etc/nginx/conf.d/${sitename}.conf"
-			sed -i "s/sitename/${sitename}/g" "/etc/nginx/conf.d/${sitename}.conf"
-			#sed -i "s/sitename.crt/${sitename}_access/" /etc/nginx/conf.d/${sitename}.conf
-			#sed -i "s/sitename.key/${sitename}_error/" /etc/nginx/conf.d/${sitename}.conf
-			#sed -i "s/sitename.crt/${sitename}.crt/" /etc/nginx/conf.d/${sitename}.conf
-			#sed -i "s/sitename.key/${sitename}.key/" /etc/nginx/conf.d/${sitename}.con
+				-e "s/# ssl_certificate \/srv\/www\/sitename\/ssl\/sitename.crt;/ssl_certificate \/srv\/www\/${site_path}\/ssl\/${site_path}.crt;/g" \
+				-e "s/# ssl_certificate_key \/srv\/www\/sitename\/ssl\/sitename.key;/ssl_certificate_key \/srv\/www\/${site_path}\/ssl\/${site_path}.key;/g" "/etc/nginx/conf.d/${site_path}.conf"
+			sed -i "s/sitename/${site_path}/g" "/etc/nginx/conf.d/${site_path}.conf"
+			#sed -i "s/sitename.crt/${site_path}_access/" /etc/nginx/conf.d/${site_path}.conf
+			#sed -i "s/sitename.key/${site_path}_error/" /etc/nginx/conf.d/${site_path}.conf
+			#sed -i "s/sitename.crt/${site_path}.crt/" /etc/nginx/conf.d/${site_path}.conf
+			#sed -i "s/sitename.key/${site_path}.key/" /etc/nginx/conf.d/${site_path}.con
 		else
 			openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "/srv/www/${hostname1}/ssl/${hostname1}.key" -out "/srv/www/${hostname1}/ssl/${hostname1}.crt"
 			chmod 400 "/etc/ssl/private/${hostname1}.key"
@@ -1122,11 +1122,11 @@ function _cert() {
 function _nocert() {
 	#  if [[ ${cert} == "no" ]]; then
 	if [[ ${sitename} == "yes" ]]; then
-		sed -i "s/sitename/${sitename}/g" "/etc/nginx/conf.d/${sitename}.conf"
-		#sed -i "s/sitename.crt/${sitename}_access/" /etc/nginx/conf.d/${sitename}.conf
-		#sed -i "s/sitename.key/${sitename}_error/" /etc/nginx/conf.d/${sitename}.conf
-		#sed -i "s/sitename.crt/${sitename}.crt/" /etc/nginx/conf.d/${sitename}.conf
-		#sed -i "s/sitename.key/${sitename}.key/" /etc/nginx/conf.d/${sitename}.conf
+		sed -i "s/sitename/${site_path}/g" "/etc/nginx/conf.d/${site_path}.conf"
+		#sed -i "s/sitename.crt/${site_path}_access/" /etc/nginx/conf.d/${site_path}.conf
+		#sed -i "s/sitename.key/${site_path}_error/" /etc/nginx/conf.d/${site_path}.conf
+		#sed -i "s/sitename.crt/${site_path}.crt/" /etc/nginx/conf.d/${site_path}.conf
+		#sed -i "s/sitename.key/${site_path}.key/" /etc/nginx/conf.d/${site_path}.conf
 	else
 		sed -i "s/sitename/${hostname1}/g" "/etc/nginx/conf.d/${hostname1}.conf"
 		#sed -i "s/sitename.crt/${hostname1}_access/" /etc/nginx/conf.d/${hostname1}.conf
