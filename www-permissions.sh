@@ -30,10 +30,10 @@ fi
 usermod -a -G www-data $newuser
 
 # Change the ownership of everything under /var/www to root:www-data
-chown www-data:www-data -R /srv/www/___/public
-chmod 2775 /srv/www/___/public
-find /srv/www/___/public -type d -exec chmod 2775 {} +
-find /srv/www/___/public -type f -exec chmod 0664 {} +
-chmod 755 /srv/www/___/public/wp-content
+chown www-data:www-data -R /srv/www/public/_
+chmod 2775 /srv/www/public/_
+find /srv/www/public/_ -type d -exec chmod 2775 {} +
+find /srv/www/public/_ -type f -exec chmod 0664 {} +
+chmod 755 /srv/www/public/_/wp-content
 
 echo 'Done! Consider changing umask to 0002.'
