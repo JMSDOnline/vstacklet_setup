@@ -517,9 +517,9 @@ function _nginx() {
 	} >>"${OUTTO}" 2>&1
 	service nginx stop >>"${OUTTO}" 2>&1
 	mv /etc/nginx /etc/nginx-previous
+	mkdir -p /etc/nginx/{conf.d,cache}
 	rsync -aP --exclude=/pagespeed --exclude=LICENSE --exclude=README --exclude=.git "${local_nginx}"* /etc/nginx >>"${OUTTO}" 2>&1
 	\cp -rf /etc/nginx-previous/uwsgi_params /etc/nginx-previous/fastcgi_params /etc/nginx >>"${OUTTO}" 2>&1
-	mkdir -p /etc/nginx/{conf.d,cache}
 	chown -R www-data /etc/nginx/cache
 	chgrp -R www-data /etc/nginx/cache
 	chmod -R g+rw /etc/nginx/cache
