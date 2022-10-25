@@ -8,6 +8,9 @@
 #
 # shellcheck disable=SC2068,1090,1091,2034,2312
 #################################################################################
+#server_ip=$(ip addr show | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | cut -d/ -f1 | head -n 1);
+#hostname1=$(hostname -s);
+#################################################################################
 #Script Console Colors
 green=$(tput setaf 2)
 yellow=$(tput setaf 3)

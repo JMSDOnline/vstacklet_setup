@@ -9,7 +9,7 @@
 # shellcheck disable=2068,1091,2312
 # find server IP and server hostname for nginx configuration
 #################################################################################
-server_ip=$(ifconfig | sed -n 's/.*inet addr:\([0-9.]\+\)\s.*/\1/p' | grep -v 127 | head -n 1)
+server_ip=$(ip addr show | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | cut -d/ -f1 | head -n 1)
 hostname1=$(hostname -s)
 #################################################################################
 #Script Console Colors
@@ -172,7 +172,6 @@ function _bashrc() {
 	else
 		sed -i "s/HOSTNAME/${hostname1}/g" /root/.bashrc
 	fi
-
 	profile="/root/.profile"
 	if [[ ! -f ${profile} ]]; then
 		cp "${local_setup}templates/profile.template" /root/.profile
@@ -206,13 +205,11 @@ function _updates() {
 			exit
 		fi
 	fi
-
 	if [[ ${DISTRO} == Debian ]]; then
 		cat >/etc/apt/sources.list <<EOF
 #------------------------------------------------------------------------------#
 #                            OFFICIAL DEBIAN REPOS                             #
 #------------------------------------------------------------------------------#
-
 
 ###### Debian Main Repos
 deb http://ftp.nl.debian.org/debian testing main contrib non-free
@@ -233,7 +230,6 @@ EOF
 #------------------------------------------------------------------------------#
 #                            OFFICIAL UBUNTU REPOS                             #
 #------------------------------------------------------------------------------#
-
 
 ###### Ubuntu Main Repos
 deb http://archive.ubuntu.com/ubuntu/ ${CODENAME} main restricted universe multiverse
@@ -258,7 +254,6 @@ EOF
 #                            OFFICIAL UBUNTU REPOS                             #
 #------------------------------------------------------------------------------#
 
-
 ###### Ubuntu Main Repos
 deb http://us.archive.ubuntu.com/ubuntu/ ${CODENAME} main restricted universe
 deb-src http://us.archive.ubuntu.com/ubuntu/ ${CODENAME} main restricted universe
@@ -270,9 +265,7 @@ deb-src http://us.archive.ubuntu.com/ubuntu/ ${CODENAME}-security main restricte
 deb-src http://us.archive.ubuntu.com/ubuntu/ ${CODENAME}-updates main restricted universe
 ABR
 	fi
-
 	echo -n "Updating system ... "
-
 	if [[ ${DISTRO} == Debian ]]; then
 		export DEBIAN_FRONTEND=noninteractive
 		{
@@ -324,14 +317,12 @@ function _softcommon() {
 	# package and repo addition (a) _install common properties_
 	apt-get -y install software-properties-common python-software-properties apt-transport-https >>"${OUTTO}" 2>&1
 	echo "${OK}"
-	echo
 }
 
 # package and repo addition (b) _install softwares and packages_
 function _depends() {
-	apt-get -y install nano unzip git dos2unix htop iotop bc libwww-perl dnsutils language-pack-en-base curl sudo >>"${OUTTO}" 2>&1
+	apt-get -y install nano unzip git dos2unix htop iotop bc libwww-perl dnsutils curl sudo >>"${OUTTO}" 2>&1
 	echo "${OK}"
-	echo
 }
 
 # package and repo addition (c) _add signed keys_
@@ -350,7 +341,6 @@ function _keys() {
 	# HHVM Signed Keys
 	curl -s http://dl.hhvm.com/conf/hhvm.gpg.key | apt-key add - >/dev/null 2>&1
 	echo "${OK}"
-	echo
 }
 
 # package and repo addition (d) _add respo sources_
@@ -358,7 +348,7 @@ function _repos() {
 	if [[ ${DISTRO} == Ubuntu ]]; then
 		# add php8.1 repo via ppa:ondrej
 		LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1
-		# use mariadb 10.2 repo
+		# use mariadb 10.7 repo
 		cat >/etc/apt/sources.list.d/mariadb.list <<EOF
 		wget -qO- https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/mariadb.gpg
 deb [arch=amd64,i386,arm64,ppc64el] http://mirrors.syringanetworks.net/mariadb/repo/10.7/ubuntu $(lsb_release -sc) main
@@ -378,14 +368,11 @@ EOF
 		#deb-src http://nginx.org/packages/mainline/ubuntu/ $(lsb_release -sc) nginx
 		#EOF
 	fi
-
 	if [[ ${DISTRO} == Debian ]]; then
-		# add php8.1 repo via dotdeb
+		# add php8.1 repo via sury
 		curl -sSLo "/usr/share/keyrings/deb.sury.org-php.gpg" "https://packages.sury.org/php/apt.gpg"
 		sh -c 'echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
 		[[ -f "/etc/apt/sources.list.d/proposed.list" ]] && mv -f /etc/apt/sources.list.d/proposed.list /etc/apt/sources.list.d/proposed.list.BAK
-		wget -q https://www.dotdeb.org/dotdeb.gpg
-		sudo apt-key add dotdeb.gpg >>/dev/null 2>&1
 		# use mariadb 10.7 repo
 		wget -qO- https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor >/etc/apt/trusted.gpg.d/mariadb.gpg
 		cat >/etc/apt/sources.list.d/mariadb.list <<EOF
@@ -406,9 +393,7 @@ EOF
 		#deb-src http://nginx.org/packages/mainline/debian/ "${CODENAME}" nginx
 		#EOF
 	fi
-
 	echo "${OK}"
-	echo
 }
 
 # package and repo addition (e) _update and upgrade_
@@ -419,7 +404,6 @@ function _updates() {
 	apt-get -y upgrade >>"${OUTTO}" 2>&1
 	apt-get -y autoremove >>"${OUTTO}" 2>&1
 	echo "${OK}"
-	echo
 }
 
 # ask php version function (12)
@@ -436,27 +420,23 @@ function _askphpversion() {
 	*) PHPVERSION=8.1 ;;
 	esac
 	echo "Using ${PHPVERSION} for php"
-	echo
 }
 
 # install php function (11)
 function _php8() {
 	echo -ne "Installing and Adjusting php${green}${PHPVERSION}${normal}-fpm w/ OPCode Cache ... "
-	#apt-get -y install php7.3 php7.3-fpm php7.3-mbstring php7.3-zip php7.3-mysql php7.3-curl php7.3-gd php7.3-json php7.3-opcache php7.3-xml >>"${OUTTO}" 2>&1;
 	apt-get -y install php8.1-fpm php8.1-zip php8.1-cgi php8.1-cli php8.1-common php8.1-curl php8.1-dev php8.1-gd php8.1-gmp php8.1-imap php8.1-intl php8.1-ldap php8.1-mbstring php8.1-mysql php8.1-opcache php8.1-pspell php8.1-readline php8.1-soap php8.1-xml libmcrypt-dev mcrypt >>"${OUTTO}" 2>&1
-
 	pconfig=$(php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||")
 	ismcrypt=$(php --ini | grep "extension=mcrypt.so" "${pconfig}")
-	if [[ ${ismcrypt} != 'extension=mcrypt.so' ]]; then
-		printf "\n" | pecl uninstall channel://pecl.php.net/mcrypt-1.0.3 >/dev/null 2>&1
-		sleep 3
-		printf "\n" | pecl install channel://pecl.php.net/mcrypt-1.0.3 >/dev/null 2>&1
-		bash -c "echo 'extension=mcrypt.so' >> /etc/php/8.1/cli/php.ini"
-		bash -c "echo 'extension=mcrypt.so' >> /etc/php/8.1/fpm/php.ini"
-	else
-		_info "mcrypt.so extension already exist in php.ini ... [skipping]"
-	fi
-
+	#if [[ ${ismcrypt} != 'extension=mcrypt.so' ]]; then
+	#	printf "\n" | pecl uninstall channel://pecl.php.net/mcrypt-1.0.3 >/dev/null 2>&1
+	#	sleep 3
+	#	printf "\n" | pecl install channel://pecl.php.net/mcrypt-1.0.3 >/dev/null 2>&1
+	#	bash -c "echo 'extension=mcrypt.so' >> /etc/php/8.1/cli/php.ini"
+	#	bash -c "echo 'extension=mcrypt.so' >> /etc/php/8.1/fpm/php.ini"
+	#else
+	#	_info "mcrypt.so extension already exist in php.ini ... [skipping]"
+	#fi
 	if [[ ${memcached} == yes ]]; then
 		#ln -nsf /etc/php/8.1/mods-available/memcached.ini /etc/php/8.1/fpm/conf.d/20-memcached.ini
 		#ln -nsf /etc/php/8.1/mods-available/memcached.ini /etc/php/8.1/cli/conf.d/20-memcached.ini
@@ -467,7 +447,6 @@ function _php8() {
 			:
 		fi
 	fi
-
 	sed -i.bak -e "s/post_max_size.*/post_max_size = 64M/" \
 		-e "s/upload_max_filesize.*/upload_max_filesize = 92M/" \
 		-e "s/expose_php.*/expose_php = Off/" \
@@ -487,13 +466,11 @@ function _php8() {
 		-e "s/;opcache.memory_consumption.*/opcache.memory_consumption=128/" \
 		-e "s/;opcache.max_accelerated_files.*/opcache.max_accelerated_files=4000/" \
 		-e "s/;opcache.revalidate_freq.*/opcache.revalidate_freq=240/" /etc/php/8.1/cli/php.ini
-
 	phpenmod -v 8.1 opcache
 	phpenmod -v 8.1 xml
 	phpenmod -v 8.1 mbstring
 	phpenmod -v 8.1 msgpack
 	phpenmod -v 8.1 memcached
-
 	echo "${OK}"
 }
 function _php5() {
@@ -525,7 +502,6 @@ function _hhvm() {
 		/usr/share/hhvm/install_fastcgi.sh
 		update-rc.d hhvm defaults
 	} >>"${OUTTO}" 2>&1
-
 	/usr/bin/update-alternatives --install /usr/bin/php php /usr/bin/hhvm 60 >>"${OUTTO}" 2>&1
 	# get off the port and use socket - HStacklet nginx configurations already know this
 	cp "${local_hhvm}server.ini.template" /etc/hhvm/server.ini
@@ -539,7 +515,6 @@ function _nginx() {
 		apt-get -y install nginx-extras
 		update-rc.d nginx defaults
 	} >>"${OUTTO}" 2>&1
-
 	service nginx stop >>"${OUTTO}" 2>&1
 	mv /etc/nginx /etc/nginx-previous
 	rsync -aP --exclude=/pagespeed --exclude=LICENSE --exclude=README --exclude=.git "${local_nginx}"* /etc/nginx >>"${OUTTO}" 2>&1
@@ -643,7 +618,7 @@ function _novarnish() {
 
 # install memcached for php8 function (12)
 function _askmemcached() {
-	echo -n "${bold}${yellow}Do you want to install Memcached for PHP 7?${normal} (${bold}${green}Y${normal}/n): "
+	echo -n "${bold}${yellow}Do you want to install Memcached for PHP 8?${normal} (${bold}${green}Y${normal}/n): "
 	read -r responce
 	case ${responce} in
 	[yY] | [yY][Ee][Ss] | "") memcached=yes ;;
@@ -1067,7 +1042,6 @@ function _security() {
 		sed -i "s/secconf3/${secconf3}/g" "/etc/nginx/conf.d/${hostname1}.conf"
 	fi
 	echo "${OK}"
-	echo
 }
 
 # create self-signed certificate function (19)
@@ -1141,7 +1115,7 @@ function _nocert() {
 # finalize and restart services function (20)
 function _services() {
 	service apache2 stop >>"${OUTTO}" 2>&1
-	for i in ssh nginx varnish ${PHPVERSION}; do
+	for i in ssh nginx varnish php${PHPVERSION}-fpm; do
 		service "${i}" restart >>"${OUTTO}" 2>&1
 		systemctl enable "${i}" >>"${OUTTO}" 2>&1
 	done
@@ -1256,14 +1230,10 @@ if [[ ${csf} == "no" ]]; then
 fi
 
 #_locale;
-echo -n "${bold}Installing Common Software Properties${normal} ... "
-_softcommon
-echo -n "${bold}Installing: nano, unzip, dos2unix, htop, iotop, libwww-perl${normal} ... "
-_depends
-echo -n "${bold}Installing signed keys for MariaDB, Nginx, PHP7, HHVM and Varnish${normal} ... "
-_keys
-echo -n "${bold}Adding trusted repositories${normal} ... "
-_repos
+echo -n "${bold}Installing Common Software Properties${normal} ... " && _softcommon
+echo -n "${bold}Installing: nano, unzip, dos2unix, htop, iotop, libwww-perl${normal} ... " && _depends
+echo -n "${bold}Installing signed keys for MariaDB, Nginx, PHP, HHVM and Varnish${normal} ... " && _keys
+echo -n "${bold}Adding trusted repositories${normal} ... " && _repos
 _updates
 
 if [[ ${varnish} == "yes" ]]; then
@@ -1298,15 +1268,12 @@ elif [[ ${ioncube} == "no" ]]; then
 	_noioncube
 fi
 #fi
-echo -n "${bold}Installing and Configuring Nginx${normal} ... "
-_nginx
-echo -n "${bold}Adjusting Permissions${normal} ... "
-_perms
+echo -n "${bold}Installing and Configuring Nginx${normal} ... " && _nginx
+echo -n "${bold}Adjusting Permissions${normal} ... " && _perms
 #echo -n "${bold}Installing and Configuring Varnish${normal} ... ";_varnish;
 #_askmariadb;
 if [[ ${mariadb} == "yes" ]]; then
-	echo -n "${bold}Installing MariaDB Drop-in Replacement${normal} ... "
-	_mariadb
+	echo -n "${bold}Installing MariaDB Drop-in Replacement${normal} ... " && _mariadb
 elif [[ ${mariadb} == "no" ]]; then
 	_nomariadb
 fi
@@ -1337,19 +1304,16 @@ elif [[ ${sendmail} == "no" ]]; then
 fi
 #fi
 echo "${bold}Addressing Location Edits: cache busting, cross domain font support,${normal}"
-echo -n "${bold}expires tags, and system file protection${normal} ... "
-_locenhance
+echo -n "${bold}expires tags, and system file protection${normal} ... " && _locenhance
 echo "${bold}Performing Security Enhancements: protecting against bad bots,${normal}"
-echo -n "${bold}file injection, and php easter eggs${normal} ... "
-_security
+echo -n "${bold}file injection, and php easter eggs${normal} ... " && _security
 #_askcert;
 #if [[ ${cert} == "yes" ]]; then
 #    _cert;
 #elif [[ ${cert} == "no" ]]; then
 _nocert
 #fi
-echo -n "${bold}Completing Installation & Restarting Services${normal} ... "
-_services
+echo -n "${bold}Completing Installation & Restarting Services${normal} ... " && _services
 
 E=$(date +%s)
 DIFF=$(echo "${E}" - "${S}" | bc)
