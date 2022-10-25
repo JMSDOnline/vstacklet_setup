@@ -518,6 +518,7 @@ function _nginx() {
 	service nginx stop >>"${OUTTO}" 2>&1
 	mv /etc/nginx /etc/nginx-previous
 	mkdir -p /etc/nginx/{conf.d,cache}
+	sleep 3
 	rsync -aP --exclude=/pagespeed --exclude=LICENSE --exclude=README --exclude=.git "${local_nginx}"* /etc/nginx >>"${OUTTO}" 2>&1
 	\cp -rf /etc/nginx-previous/uwsgi_params /etc/nginx-previous/fastcgi_params /etc/nginx >>"${OUTTO}" 2>&1
 	chown -R www-data /etc/nginx/cache
@@ -729,6 +730,7 @@ function _phpmyadmin() {
 		# generate random passwords for the MySql root user
 		pmapass=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)
 		mysqlpass=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)
+		pma_bf=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 31)
 		mysqladmin -u root -h localhost password "${mysqlpass}"
 		echo -n "${bold}Installing MySQL with user:${normal} ${bold}${green}root${normal}${bold} / passwd:${normal} ${bold}${green}${mysqlpass}${normal} ... "
 		apt-get -y install debconf-utils >>"${OUTTO}" 2>&1
@@ -740,27 +742,51 @@ function _phpmyadmin() {
 		echo "phpmyadmin phpmyadmin/app-password-confirm password ${pmapass}" | debconf-set-selections
 		echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect none" | debconf-set-selections
 		apt-get -y install phpmyadmin >>"${OUTTO}" 2>&1
+		cd /usr/share || echo "Error: Unable to move to /usr/share"
+		rm -rf phpmyadmin
+		PMA_VERSION=$(curl -i -s https://www.phpmyadmin.net/downloads/ | grep -Eo "phpMyAdmin-.*" | grep -Eo "[0-9.]+" | head -n1)
+		wget -q -P /usr/share/ "https://files.phpmyadmin.net/phpMyAdmin/${PMA_VERSION}/phpMyAdmin-${PMA_VERSION}-all-languages.zip"
+		unzip "phpMyAdmin-${PMA_VERSION}-all-languages.zip" >/dev/null 2>&1
+		cp -r "phpMyAdmin-${PMA_VERSION}-all-languages" phpmyadmin
+		rm -rf "phpMyAdmin-${PMA_VERSION}-all-languages"*
+		cd /usr/share/phpmyadmin || echo "Error: Unable to move to /usr/share/phpmyadmin"
+		cp config.sample.inc.php config.inc.php
+		sed -i "s/\$cfg\['blowfish_secret'\] = .*;/\$cfg\['blowfish_secret'\] = '${pma_bf}';/g" /usr/share/phpmyadmin/config.inc.php
+		mkdir tmp && chown -R www-data:www-data /usr/share/phpmyadmin/tmp
 		if [[ ${sitename} == "yes" ]]; then
 			# create a sym-link to live directory.
-			ln -s /usr/share/phpmyadmin "/srv/www/${site_path}/public"
+			ln -sf /usr/share/phpmyadmin "/srv/www/${site_path}/public"
 		else
 			# create a sym-link to live directory.
-			ln -s /usr/share/phpmyadmin "/srv/www/${hostname1}/public"
+			ln -sf /usr/share/phpmyadmin "/srv/www/${hostname1}/public"
 		fi
 		echo "${OK}"
 		# show phpmyadmin creds
 		{
-			echo '[phpMyAdmin Login]'
-			echo " - pmadbuser='phpmyadmin'"
-			echo " - pmadbpass='${pmapass}'"
-			echo ''
-			echo "   Access phpMyAdmin at: "
-			echo "   http://${server_ip}:8080/phpmyadmin/"
-			echo ''
-			echo ''
-			echo '[MySQL Login]'
-			echo " - sqldbuser='root'"
-			echo " - sqldbpass='${mysqlpass}'"
+			echo "[client]"
+			echo "user=root"
+			echo "password=${mysqlpass}"
+			echo ""
+			echo "[mysql]"
+			echo "user=root"
+			echo "password=${mysqlpass}"
+			echo ""
+			echo "[mysqldump]"
+			echo "user=root"
+			echo "password=${mysqlpass}"
+			echo ""
+			echo "[mysqldiff]"
+			echo "user=root"
+			echo "password=${mysqlpass}"
+			echo ""
+			echo "[phpmyadmin]"
+			echo "pmadbuser=phpmyadmin"
+			echo "pmadbpass=${pmapass}"
+			echo ""
+			echo "-------------------------------------------------------------"
+			echo "  Access phpMyAdmin at: "
+			echo "  http://${server_ip}:8080/phpmyadmin/"
+			echo "-------------------------------------------------------------"
 			echo
 		} >>~/.my.cnf
 		# closing statement
@@ -1159,7 +1185,7 @@ function _finished() {
 	echo
 	echo "${black}${on_green}    [vstacklet] Varnish LEMP Stack Installation Completed    ${normal}"
 	echo
-	echo "${bold}Visit ${green}http://${server_ip}/checkinfo.php${normal} ${bold}to verify your install. ${normal}"
+	echo "${bold}Visit ${green}http://${server_ip}:8080/checkinfo.php${normal} ${bold}to verify your install. ${normal}"
 	echo "${bold}Remember to remove the checkinfo.php file after verification. ${normal}"
 	echo
 	echo
