@@ -57,14 +57,14 @@ function _intro() {
 	echo
 	echo "${green}Checking distribution ...${normal}"
 	if [[ ! -x /usr/bin/lsb_release ]]; then
-		echo "It looks like you are running ${DISTRO}, which is not supported by QuickBox."
+		echo "It looks like you are running ${DISTRO}, which is not supported by vstacklet."
 		echo "Exiting..."
 		exit 1
 	fi
 	"$(lsb_release -a)"
 	echo
 	if [[ ! ${DISTRO} =~ ("Ubuntu"|"Debian") ]]; then
-		echo "${DISTRO}: ${alert} It looks like you are running ${DISTRO}, which is not supported by QuickBox ${normal} "
+		echo "${DISTRO}: ${alert} It looks like you are running ${DISTRO}, which is not supported by vstacklet ${normal} "
 		echo 'Exiting...'
 		exit 1
 	elif [[ ! ${CODENAME} =~ ("yakkety"|"xenial"|"bionic"|"focal"|"jessie"|"buster"|"bullseye") ]]; then
