@@ -87,8 +87,7 @@ VERSION="3.1.0"
 
 _askvstacklet
 if [[ ${vstacklet} == "yes" ]]; then
-	echo -n "${bold}Installing VStacklet Kit for Ubuntu 18.04, 20.04 & Debian 9, 10, and 11 support${normal} ... "
-	_vstacklet
+	echo -n "${bold}Installing VStacklet Kit for Ubuntu 18.04, 20.04 & Debian 9, 10, and 11 support${normal} ... " && _vstacklet
 elif [[ ${vstacklet} == "no" ]]; then
 	_novstacklet
 fi
