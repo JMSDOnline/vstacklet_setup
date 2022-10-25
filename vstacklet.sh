@@ -29,7 +29,6 @@ mkdir -p /backup/{directories,databases}
 # Download VStacklet System Backup Executable
 chmod +x /etc/vstacklet/packages/backup/*
 mv vs-backup /usr/local/bin
-mv
 
 function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15; }
 
@@ -45,7 +44,7 @@ function _askvstacklet() {
 	echo "${bold} Actively maintained and quality controlled.${normal}"
 	echo
 	echo
-	echo -n "${bold}${yellow}Are you ready to install VStacklet for Ubuntu 16.04 & Debian 8?${normal} (${bold}${green}Y${normal}/n): "
+	echo -n "${bold}${yellow}Are you ready to install VStacklet for Ubuntu 18.04/20.04 & Debian 9/10/11 ?${normal} (${bold}${green}Y${normal}/n): "
 	read -r responce
 	case ${responce} in
 	[yY] | [yY][Ee][Ss] | "") vstacklet=yes ;;
@@ -79,7 +78,7 @@ VERSION="3.1.0"
 
 _askvstacklet
 if [[ ${vstacklet} == "yes" ]]; then
-	echo -n "${bold}Installing VStacklet Kit for Ubuntu 16.04, 18.04, 20.04 & Debian 8, 9, 10, and 11 support${normal} ... "
+	echo -n "${bold}Installing VStacklet Kit for Ubuntu 18.04, 20.04 & Debian 9, 10, and 11 support${normal} ... "
 	_vstacklet
 elif [[ ${vstacklet} == "no" ]]; then
 	_novstacklet
