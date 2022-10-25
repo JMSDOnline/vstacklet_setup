@@ -5,7 +5,8 @@
 # GitHub:   https://github.com/JMSDOnline/vstacklet
 # Author:   Jason Matthews
 # URL:      https://jmsolodesigns.com/code-projects/vstacklet/varnish-lemp-stack
-# shellcheck disable=SC1090
+#
+# shellcheck disable=SC2068,1090,1091,2034,2312
 #################################################################################
 #Script Console Colors
 green=$(tput setaf 2)
@@ -14,6 +15,12 @@ cyan=$(tput setaf 6)
 standout=$(tput smso)
 normal=$(tput sgr0)
 title=${standout}
+#################################################################################
+if [[ -f /usr/bin/lsb_release ]]; then
+	DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
+elif [[ -f "/etc/debian_version" ]]; then
+	DISTRO='Debian'
+fi
 #################################################################################
 
 # Create vstacklet & backup directory strucutre
@@ -43,7 +50,10 @@ function _askvstacklet() {
 	case ${responce} in
 	[yY] | [yY][Ee][Ss] | "") vstacklet=yes ;;
 	[nN] | [nN][Oo]) vstacklet=no ;;
-	*) echo "Invalid input..." ; _askvstacklet ;;
+	*)
+		echo "Please answer yes or no."
+		_askvstacklet
+		;;
 	esac
 }
 
@@ -69,7 +79,7 @@ VERSION="3.1.0"
 
 _askvstacklet
 if [[ ${vstacklet} == "yes" ]]; then
-	echo -n "${bold}Installing VStacklet Kit for Ubuntu 16.04 & Debian 8 support${normal} ... "
+	echo -n "${bold}Installing VStacklet Kit for Ubuntu 16.04, 18.04, 20.04 & Debian 8, 9, 10, and 11 support${normal} ... "
 	_vstacklet
 elif [[ ${vstacklet} == "no" ]]; then
 	_novstacklet
