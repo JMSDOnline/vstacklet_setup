@@ -52,7 +52,7 @@ function _intro() {
 	echo
 	echo "   ${title}              Heads Up!               ${normal} "
 	echo "   ${message_title}  VStacklet works with the following  ${normal} "
-	echo "   ${message_title}  Ubuntu 16.04/18.04/20.04 & Debian 8/9/10/11     ${normal} "
+	echo "   ${message_title}  Ubuntu 18.04/20.04 & Debian 9/10/11     ${normal} "
 	echo
 	echo
 	echo "${green}Checking distribution ...${normal}"
@@ -67,7 +67,7 @@ function _intro() {
 		echo "${DISTRO}: ${alert} It looks like you are running ${DISTRO}, which is not supported by vstacklet ${normal} "
 		echo 'Exiting...'
 		exit 1
-	elif [[ ! ${CODENAME} =~ ("yakkety"|"xenial"|"bionic"|"focal"|"jessie"|"buster"|"bullseye") ]]; then
+	elif [[ ! ${CODENAME} =~ ("bionic"|"focal"|"jessie"|"buster"|"bullseye") ]]; then
 		echo "Oh drats! You do not appear to be running a supported ${DISTRO} release."
 		echo "${bold}${SETNAME}${normal}"
 		echo 'Exiting...'
@@ -360,8 +360,9 @@ function _repos() {
 		LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php -y >>"${OUTTO}" 2>&1
 		# use mariadb 10.2 repo
 		cat >/etc/apt/sources.list.d/mariadb.list <<EOF
-deb [arch=amd64,i386] http://mirrors.syringanetworks.net/mariadb/repo/10.3/ubuntu $(lsb_release -sc) main
-deb-src http://mirrors.syringanetworks.net/mariadb/repo/10.3/ubuntu/ $(lsb_release -sc) main
+		wget -qO- https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/mariadb.gpg
+deb [arch=amd64,i386,arm64,ppc64el] http://mirrors.syringanetworks.net/mariadb/repo/10.7/ubuntu $(lsb_release -sc) main
+deb-src http://mirrors.syringanetworks.net/mariadb/repo/10.7/ubuntu/ $(lsb_release -sc) main
 EOF
 		# use the trusty branch to install varnish
 		#    cat >/etc/apt/sources.list.d/varnish-cache.list<<EOF
@@ -372,7 +373,6 @@ EOF
 deb http://dl.hhvm.com/ubuntu $(lsb_release -sc) main
 EOF
 		# use nginx development
-		add-apt-repository ppa:nginx/development -y >>"${OUTTO}" 2>&1
 		#    cat >/etc/apt/sources.list.d/nginx-mainline-$(lsb_release -sc).list<<EOF
 		#deb http://nginx.org/packages/mainline/ubuntu/ $(lsb_release -sc) nginx
 		#deb-src http://nginx.org/packages/mainline/ubuntu/ $(lsb_release -sc) nginx
@@ -381,16 +381,16 @@ EOF
 
 	if [[ ${DISTRO} == Debian ]]; then
 		# add php8.1 repo via dotdeb
-		cat >/etc/apt/sources.list.d/dotdeb-php8-"$(lsb_release -sc)".list <<EOF
-deb http://packages.dotdeb.org $(lsb_release -sc) all
-deb-src http://packages.dotdeb.org $(lsb_release -sc) all
-EOF
+		curl -sSLo "/usr/share/keyrings/deb.sury.org-php.gpg" "https://packages.sury.org/php/apt.gpg"
+		sh -c 'echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
+		[[ -f "/etc/apt/sources.list.d/proposed.list" ]] && mv -f /etc/apt/sources.list.d/proposed.list /etc/apt/sources.list.d/proposed.list.BAK
 		wget -q https://www.dotdeb.org/dotdeb.gpg
 		sudo apt-key add dotdeb.gpg >>/dev/null 2>&1
-		# use mariadb 10.2 repo
+		# use mariadb 10.7 repo
+		wget -qO- https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor >/etc/apt/trusted.gpg.d/mariadb.gpg
 		cat >/etc/apt/sources.list.d/mariadb.list <<EOF
-deb [arch=amd64,i386] http://mirrors.syringanetworks.net/mariadb/repo/10.3/debian $(lsb_release -sc) main
-deb-src http://mirrors.syringanetworks.net/mariadb/repo/10.3/debian/ $(lsb_release -sc) main
+deb [arch=amd64,i386,arm64,ppc64el] http://mirrors.syringanetworks.net/mariadb/repo/10.7/debian $(lsb_release -sc) main
+deb-src http://mirrors.syringanetworks.net/mariadb/repo/10.7/debian/ $(lsb_release -sc) main
 EOF
 		# use the jessie branch to install varnish 4.1
 		#    cat >/etc/apt/sources.list.d/varnish-cache.list<<EOF
@@ -443,7 +443,7 @@ function _askphpversion() {
 function _php8() {
 	echo -ne "Installing and Adjusting php${green}${PHPVERSION}${normal}-fpm w/ OPCode Cache ... "
 	#apt-get -y install php7.3 php7.3-fpm php7.3-mbstring php7.3-zip php7.3-mysql php7.3-curl php7.3-gd php7.3-json php7.3-opcache php7.3-xml >>"${OUTTO}" 2>&1;
-	apt-get -y install php8.1-fpm php8.1-zip php8.1-cgi php8.1-cli php8.1-common php8.1-curl php8.1-dev php8.1-gd php8.1-gmp php8.1-imap php8.1-intl php8.1-json php8.1-ldap php8.1-mbstring php8.1-mysql php8.1-opcache php8.1-pspell php8.1-readline php8.1-soap php8.1-xml libmcrypt-dev mcrypt >>"${OUTTO}" 2>&1
+	apt-get -y install php8.1-fpm php8.1-zip php8.1-cgi php8.1-cli php8.1-common php8.1-curl php8.1-dev php8.1-gd php8.1-gmp php8.1-imap php8.1-intl php8.1-ldap php8.1-mbstring php8.1-mysql php8.1-opcache php8.1-pspell php8.1-readline php8.1-soap php8.1-xml libmcrypt-dev mcrypt >>"${OUTTO}" 2>&1
 
 	pconfig=$(php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||")
 	ismcrypt=$(php --ini | grep "extension=mcrypt.so" "${pconfig}")
