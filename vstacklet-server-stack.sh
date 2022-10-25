@@ -61,7 +61,7 @@ function _intro() {
 		echo "Exiting..."
 		exit 1
 	fi
-	"$(lsb_release -a)"
+	echo "$(lsb_release -a)"
 	echo
 	if [[ ! ${DISTRO} =~ ("Ubuntu"|"Debian") ]]; then
 		echo "${DISTRO}: ${alert} It looks like you are running ${DISTRO}, which is not supported by vstacklet ${normal} "
