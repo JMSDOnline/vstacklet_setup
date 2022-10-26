@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1169
+# @version: 3.1.1170
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -478,7 +478,7 @@ vstacklet::bashrc::set() {
 ##################################################################################
 # @name: vstacklet::hostname::set (5)
 # @description: set system hostname
-# @option: $1 - `-h | --hostname`
+# @option: $1 - `-h | --hostname` (optional) (takes one argument)
 # @arg: $2 - `[hostname]` - the hostname to set for the system (optional) 
 # @example: ./vstacklet.sh -h myhostname 
 # ./vstacklet.sh --hostname myhostname
@@ -541,7 +541,7 @@ vstacklet::webroot::set() {
 ##################################################################################
 # @name: vstacklet::ssh::set (7)
 # @description: set ssh port to custom port (if nothing is set, default port is 22)
-# @option: $1 - `-ssh | --ssh_port` (optional) (default: 22)
+# @option: $1 - `-ssh | --ssh_port` (optional) (takes one argument)
 # @arg: $2 - `[port]` (default: 22) - the port to set for ssh
 # @return: none
 # @example: ./vstacklet.sh -ssh 2222
@@ -918,7 +918,7 @@ vstacklet::php::install() {
 ##################################################################################
 # @name: vstacklet::nginx::install (12)
 # @description: install nginx (optional) (default: not installed)
-# @option: $1 - `-nginx | --nginx`
+# @option: $1 - `-nginx | --nginx` (optional) (takes no arguments)
 # @example: ./vstacklet.sh -nginx
 # ./vstacklet.sh --nginx
 # @break
@@ -1107,7 +1107,7 @@ vstacklet::varnish::install() {
 ##################################################################################
 # @name: vstacklet::ioncube::install (16)
 # @description: install ioncube (optional)
-# @option: $1 - -ioncube | --ioncube
+# @option: $1 - `-ioncube | --ioncube` (optional) (takes no arguments)
 # @example: ./vstacklet.sh -ioncube
 # ./vstacklet.sh --ioncube
 # @null:
