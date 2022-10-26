@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1002
+# @version: 3.1.1078
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -82,48 +82,46 @@ vstacklet::environment::init() {
 ##################################################################################
 # @name: vstacklet::args::process
 # @description: process the arguments passed to the script
-# @param: $1 - the argument to process
-# @param: $2 - the value of the argument
+# @arg: $1 - the argument to process
+# @arg: $2 - the value of the argument
 # @example: ./vstacklet.sh "-e" "your@email.com" "-php" "8.1" "-nginx" "-mdb" "-pma" "-sendmail" "-wr" "[directory_name]"
 # @note: This function is required for the installation of
 # the vStacklet software.
 ##################################################################################
-# @args:
-#  $@ vstacklet install arguments
-#  --help|-h|-? show help
-#  --version: show version
-#  --non-interactive: run in non-interactive mode
+# @param: `--help` - show help
+# @param: `--version` - show version
+# @param: `--non-interactive` - run in non-interactive mode
 #
-#  -e|--email: email address to use for the Let's Encrypt SSL certificate
-#  -p|--password: password to use for the MySQL root user
+# @param:  `-e | --email` - mail address to use for the Let's Encrypt SSL certificate
+# @param:  `-p | --password` - assword to use for the MySQL root user
 #
-#  -ftp|--ftp_port: port to use for the FTP server
-#  -ssh|--ssh_port: port to use for the SSH server
-#  -http|--http_port: port to use for the HTTP server
-#  -https|--https_port: port to use for the HTTPS server
-#  -mysql|--mysql_port: port to use for the MySQL server
-#  -varnishP|--varnish_port: port to use for the Varnish server
+# @param: `-ftp | --ftp_port` - ort to use for the FTP server
+# @param: `-ssh | --ssh_port` - ort to use for the SSH server
+# @param: `-http | --http_port` - ort to use for the HTTP server
+# @param: `-https | --https_port` - ort to use for the HTTPS server
+# @param: `-mysql | --mysql_port` - ort to use for the MySQL server
+# @param: `-varnishP | --varnish_port` - ort to use for the Varnish server
 #
-#  -hn|--hostname: hostname to use for the server
-#  -dmn|--domain: domain name to use for the server
+# @param: `-hn | --hostname` - ostname to use for the server
+# @param: `-dmn | --domain` - omain name to use for the server
 #
-#  -php|--php: PHP version to install (7.4, 8.1)
-#  -mc|--memcached: install Memcached
-#  -nginx|--nginx: install Nginx
-#  -varnish|--varnish: install Varnish
-#  -hhvm|--hhvm: install HHVM
+# @param: `-php | --php` - HP version to install (7.4, 8.1)
+# @param: `-mc | --memcached` - nstall Memcached
+# @param: `-nginx | --nginx` - nstall Nginx
+# @param: `-varnish | --varnish` - nstall Varnish
+# @param: `-hhvm | --hhvm` - nstall HHVM
 #
-#  -mdb|--mariadb: install MariaDB
-#  -rdb|--redis: install Redis
+# @param: `-mdb | --mariadb` - nstall MariaDB
+# @param: `-rdb | --redis` - nstall Redis
 #
-#  -pma|--phpmyadmin: install phpMyAdmin
-#  -csf|--csf: install CSF firewall
-#  -sendmail|--sendmail: install Sendmail
+# @param: `-pma | --phpmyadmin` - nstall phpMyAdmin
+# @param: `-csf | --csf` - nstall CSF firewall
+# @param: `-sendmail | --sendmail` - nstall Sendmail
 #
-#  -wr|--web_root: the web root directory to use for the server
-#  -wp|--wordpress: install WordPress
+# @param: `-wr | --web_root` - he web root directory to use for the server
+# @param: `-wp | --wordpress` - nstall WordPress
 #
-#  --reboot: reboot the server after the installation
+# @param: `--reboot` - eboot the server after the installation
 ##################################################################################
 vstacklet::args::process() {
 	while [[ $# -gt 0 ]]; do
@@ -406,7 +404,7 @@ vstacklet::ask::continue() {
 ##################################################################################
 # @name: vstacklet::bashrc::set (4)
 # @description: set ~/.bashrc and ~/.profile for vstacklet
-# @param: none
+# @noparams:
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
@@ -510,7 +508,8 @@ vstacklet::ssh::set() {
 # @description: blocks an insecure port 1900 that may lead to
 # DDoS masked attacks. Only remove this function if you absolutely
 # need port 1900. In most cases, this is a junk port.
-# @param: none
+# @noargs:
+# @noparams:
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
@@ -527,7 +526,7 @@ vstacklet::block::ssdp() {
 ##################################################################################
 # @name: vstacklet::update::packages (14)
 # @description: This function updates the package list and upgrades the system.
-# @param: none
+# @noparams:
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
@@ -658,7 +657,8 @@ vstacklet::locale::set() {
 # @name: vstacklet::packages::softcommon (6)
 # @description: This function updates the system packages and installs
 # the required common property packages for the vStacklet software.
-# @param: none
+# @noparams:
+# @noargs:
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
@@ -673,7 +673,8 @@ vstacklet::packages::softcommon() {
 # @name: vstacklet::packages::depends (7)
 # @description: This function installs the required software packages
 # for the vStacklet software.
-# @param: none
+# @noparams:
+# @noargs:
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
@@ -688,7 +689,8 @@ vstacklet::packages::depends() {
 # @name: vstacklet::packages::keys (8)
 # @description: This function sets the required software package keys
 # and sources for the vStacklet software.
-# @param: none
+# @noparams:
+# @noargs:
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
@@ -740,8 +742,9 @@ EOF
 
 ##################################################################################
 # @name: vstacklet::apt::update (9)
-# @desc: update apt sources and packages - this is a wrapper for apt-get update
-# @param: none
+# @description: update apt sources and packages - this is a wrapper for apt-get update
+# @noparams:
+# @noargs:
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
@@ -773,18 +776,17 @@ vstacklet::apt::update() {
 
 ##################################################################################
 # @name: vstacklet::php::install (11)
-# @desc: install php and php modules (optional) (default: not installed)
+# @description: install php and php modules (optional) (default: not installed)
 # @note: versioning
 # - php < "7.4" - not supported, deprecated
 # - php = "7.4" - supported
 # - php = "8.0" - superceded by php="8.1"
 # - php = "8.1" - supported
 # - chose either php or hhvm, not both
-#
-# @param: $1 - -php | --php
-# @param: $2 - [version] - 7.4 | 8.1
-# @example: ./vstacklet.sh -php 8.1 (or) ./vstacklet.sh --php 7.4
-#
+# @param: $1 - `-php | --php`
+# @param: $2 - `[version]` - `7.4` | `8.1`
+# @example: ./vstacklet.sh -php 8.1
+# ./vstacklet.sh --php 7.4
 # @note: php modules are installed based on the following variables:
 # - -php [php version] (default: 8.1) - php version to install
 # - php_modules are installed based on the php version and neccessity
@@ -850,11 +852,10 @@ vstacklet::php::install() {
 
 ##################################################################################
 # @name: vstacklet::nginx::install (12)
-# @desc: install nginx (optional) (default: not installed)
-# @param: $1 - -nginx | --nginx
-# @example: ./vstacklet.sh -nginx (or) ./vstacklet.sh --nginx
-# @note: This function is required for the installation of
-# the vStacklet software.
+# @description: install nginx (optional) (default: not installed)
+# @param: $1 - `-nginx | --nginx`
+# @example: ./vstacklet.sh -nginx
+# ./vstacklet.sh --nginx
 ##################################################################################
 vstacklet::nginx::install() {
 	if [[ -n ${nginx} ]]; then
@@ -920,9 +921,10 @@ vstacklet::nginx::install() {
 
 ##################################################################################
 # @name: vstacklet::hhvm::install (13)
-# @desc: install hhvm (optional) (default: not installed)
-# @param: $1 - -hhvm | --hhvm
-# @example: ./vstacklet.sh -hhvm (or) ./vstacklet.sh --hhvm
+# @description: install hhvm (optional) (default: not installed)
+# @param: $1 - `-hhvm | --hhvm`
+# @example: ./vstacklet.sh -hhvm 
+# ./vstacklet.sh --hhvm
 # @note: chose either php or hhvm, not both
 ##################################################################################
 vstacklet::hhvm::install() {
@@ -945,13 +947,14 @@ vstacklet::hhvm::install() {
 
 ##################################################################################
 # @name: vstacklet::permissions::adjust (14)
-# @desc: adjust permissions for web root
-# @param: none
+# @description: adjust permissions for web root
+# @noparams:
+# @noargs:
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
 # @note: permissions are adjusted based on the following variables:
-# - -wr|--web_root
+# @note: -wr | --web_root
 ##################################################################################
 vstacklet::permissions::adjust() {
 	if [[ -n ${web_root} ]]; then
@@ -970,12 +973,12 @@ vstacklet::permissions::adjust() {
 
 ##################################################################################
 # @name: vstacklet::varnish::install (15)
-# @desc: install varnish (optional)
-# @param: $1 - -varnish | --varnish
-# @param: $2 - -varnishP | --varnish_port
-# @param: $3 - -http | --http_port
+# @description: install varnish (optional)
+# @param: $1 - `-varnish | --varnish`
+# @param: $2 - `-varnishP | --varnish_port`
+# @param: $3 - `-http | --http_port`
 # @example: ./vstacklet.sh -varnish -varnishP 6081 -http 80
-# (or) ./vstacklet.sh --varnish --varnish_port 6081 --http_port 80
+# ./vstacklet.sh --varnish --varnish_port 6081 --http_port 80
 # @note: varnish is installed based on the following variables:
 # - -varnish (optional) (default: nginx)
 # - -varnishP|--varnish_port (optional) (default: 6081)
@@ -1016,7 +1019,7 @@ vstacklet::varnish::install() {
 
 ##################################################################################
 # @name: _memcached (null)
-# @desc: install memcached (optional) - internal function
+# @description: install memcached (optional) - internal function
 # @note: archiving function for memcached as this is handled
 # by the vStacklet::php::install function
 # @todo: remove this function
@@ -1032,7 +1035,7 @@ vstacklet::varnish::install() {
 
 ##################################################################################
 # @name: vstacklet::ioncube::install (16)
-# @desc: install ioncube (optional)
+# @description: install ioncube (optional)
 # @param: $1 - -ioncube | --ioncube
 # @example: ./vstacklet.sh -ioncube
 # (or) ./vstacklet.sh --ioncube
