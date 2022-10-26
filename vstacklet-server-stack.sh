@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1001
+# @version: 3.1.1002
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -1030,8 +1030,18 @@ vstacklet::varnish::install() {
 #	echo "${OK}"
 #}
 
-function _ioncube() {
-	if [[ ${ioncube} == "yes" ]]; then
+##################################################################################
+# @name: vstacklet::ioncube::install (16)
+# @desc: install ioncube (optional)
+# @param: $1 - -ioncube | --ioncube
+# @example: ./vstacklet.sh -ioncube
+# (or) ./vstacklet.sh --ioncube
+# @note: ioncube is installed based on the following variables:
+# - -ioncube (optional) (default: no)
+# @todo: add support for ioncube loader for php 7.4/8.1
+##################################################################################
+vstacklet::ioncube::install() {
+	if [[ -n ${ioncube} ]]; then
 		echo -n "${green}Installing IonCube Loader${normal} ... "
 		mkdir -p /tmp 2>&1
 		cd /tmp || _error "Could not change directory to /tmp" && exit 1
