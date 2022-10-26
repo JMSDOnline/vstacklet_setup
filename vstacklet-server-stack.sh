@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1157
+# @version: 3.1.1169
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -93,27 +93,33 @@ vstacklet::environment::init() {
 # @option: `--version` - show version
 # @option: `--non-interactive` - run in non-interactive mode
 #
-# @option:  `-e | --email` - mail address to use for the Let's Encrypt SSL certificate
-# @option:  `-p | --password` - password to use for the MySQL root user
+# @option: `-e | --email` - mail address to use for the Let's Encrypt SSL certificate
+# @option: `-p | --password` - password to use for the MySQL root user
 #
 # @option: `-ftp | --ftp_port` - port to use for the FTP server
 # @option: `-ssh | --ssh_port` - port to use for the SSH server
 # @option: `-http | --http_port` - port to use for the HTTP server
 # @option: `-https | --https_port` - port to use for the HTTPS server
-# @option: `-mysql | --mysql_port` - port to use for the MySQL server
-# @option: `-varnishP | --varnish_port` - port to use for the Varnish server
 #
-# @option: `-hn | --hostname` - hostname to use for the server
-# @option: `-dmn | --domain` - domain name to use for the server
+# @option: `-h | --hostname` - hostname to use for the server
+# @option: `-d | --domain` - domain name to use for the server
 #
 # @option: `-php | --php` - PHP version to install (7.4, 8.1)
 # @option: `-mc | --memcached` - install Memcached
-# @option: `-nginx | --nginx` - install Nginx
-# @option: `-varnish | --varnish` - install Varnish
 # @option: `-hhvm | --hhvm` - install HHVM
 #
-# @option: `-mdb | --mariadb` - install MariaDB
-# @option: `-rdb | --redis` - install Redis
+# @option: `-nginx | --nginx` - install Nginx
+#
+# @option: `-varnish | --varnish` - install Varnish
+# @option: `-varnishP | --varnish_port` - port to use for the Varnish server
+#
+# @option: `-mariadb | --mariadb` - install MariaDB
+# @option: `-mariadbP | --mariadb_port` - port to use for the MariaDB server
+# @option: `-mariadbU | --mariadb_user` - user to use for the MariaDB server
+# @option: `-mariadbPw | --mariadb-password` - password to use for the MariaDB root user
+# 
+# @option: `-redis | --redis` - install Redis
+# @option: `-postgre | --postgre` - install PostgreSQL
 #
 # @option: `-pma | --phpmyadmin` - install phpMyAdmin
 # @option: `-csf | --csf` - install CSF firewall
@@ -142,8 +148,9 @@ vstacklet::args::process() {
 		-csf | --csf)
 			declare -gi csf="1"
 			shift
+			[[ -z ${email} ]] && _error "Please provide an email address to use for the sendmail alias required by CSF." && exit 1
 			;;
-		-dmn* | --domain*)
+		-d* | --domain*)
 			declare -gi domain_ssl=1
 			declare -g domain="${2}"
 			shift
@@ -167,22 +174,54 @@ vstacklet::args::process() {
 			declare -gi hhvm="1"
 			shift
 			;;
-		-hn* | --hostname*)
+		-h* | --hostname*)
 			declare -g hostname="${2}"
 			shift
 			shift
 			[[ -n ${hostname} && $(echo "${hostname}" | grep -P '(?=^.{5,254}$)(^(?:(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+\.(?:[a-z]{2,})$)') == "" ]] && vstacklet::clean::rollback 5
 			[[ -z ${hostname} ]] && declare -g hostname && hostname=$(echo "${server_hostname}" | cut -d. -f1)
 			;;
-		-mdb | --mariadb)
+		-mariadb | --mariadb)
 			declare -gi mariadb="1"
 			shift
+			;;
+		-mariadbU* | --mariadb_user*)
+			declare -g mariadb_user="${2}"
+			shift
+			shift
+			;;
+		-mariadbPw* | --mariadb_password*)
+			declare -g mariadb_password="${2}"
+			shift
+			shift
+			;;
+		-mariadbP* | --mariadb_port*)
+			declare -gi mariadb_port="${2}"
+			shift
+			shift
+			[[ -n ${mariadb_port} && ${mariadb_port} != ?(-)+([0-9]) ]] && vstacklet::clean::rollback 6
+			[[ -n ${mariadb_port} && ${mariadb_port} -lt 1 || ${mariadb_port} -gt 65535 ]] && _error "Invalid MariaDB port number. Please enter a number between 1 and 65535." && vstacklet::clean::rollback 6
+			[[ -z ${mariadb_port} ]] && declare -gi mariadb_port="3306"
 			;;
 		-mc | --memcached)
 			declare -gi memcached="1"
 			shift
 			;;
-		-mysql* | --mysql_port*)
+		-mysql | --mysql)
+			declare -gi mysql="1"
+			shift
+			;;
+		-mysqlU* | --mysql_user*)
+			declare -g mysql_user="${2}"
+			shift
+			shift
+			;;
+		-mysqlPw* | --mysql_password*)
+			declare -g mysql_password="${2}"
+			shift
+			shift
+			;;
+		-mysqlP* | --mysql_port*)
 			declare -gi mysql_port="${2}"
 			shift
 			shift
@@ -191,6 +230,10 @@ vstacklet::args::process() {
 			;;
 		-nginx | --nginx)
 			declare -gi nginx="1"
+			shift
+			;;
+		-postgre | --postgre)
+			declare -gi postgre="1"
 			shift
 			;;
 		-pma | --phpmyadmin)
@@ -222,7 +265,7 @@ vstacklet::args::process() {
 			[[ -n ${http_port} && ${http_port} != ?(-)+([0-9]) ]] && vstacklet::clean::rollback 9
 			[[ -z ${http_port} ]] && declare -gi http_port="80"
 			;;
-		-rdb | --redis)
+		-redis | --redis)
 			declare -gi redis="1"
 			shift
 			;;
@@ -435,9 +478,9 @@ vstacklet::bashrc::set() {
 ##################################################################################
 # @name: vstacklet::hostname::set (5)
 # @description: set system hostname
-# @option: $1 - -hn | --hostname
-# @arg: $2 - [hostname] - the hostname to set for the system (optional) 
-# @example: ./vstacklet.sh -hn myhostname 
+# @option: $1 - `-h | --hostname`
+# @arg: $2 - `[hostname]` - the hostname to set for the system (optional) 
+# @example: ./vstacklet.sh -h myhostname 
 # ./vstacklet.sh --hostname myhostname
 # @note:
 # - hostname must be a valid hostname.
@@ -465,17 +508,16 @@ vstacklet::hostname::set() {
 
 ##################################################################################
 # @name: vstacklet::webroot::set (6)
-# @description: setting main web root directory
-# @option: $1 - -wr | --web_root
-# @arg: $2 - [web_root_directory]
+# @description: set main web root directory
+# - if the directory already exists, it will be used.
+# - if the directory does not exist, it will be created.
+# - if `-wr | --web_root` is not set, the default directory will be used.
+#   e.g. `/var/www/html/{public,logs,ssl}`
+# @option: $1 - `-wr | --web_root` (optional) (takes one argument)
+# @arg: $2 - `[web_root_directory]` - (optional) (default: /var/www/html)
 # @return: none
 # @example: ./vstacklet.sh -wr /var/www/mydirectory
 # ./vstacklet.sh --web_root /srv/www/mydirectory
-# @note:
-# - if the directory already exists, it will be used.
-# - if the directory does not exist, it will be created.
-# - if -wr | --web_root is not set, the default directory will be used.
-#   e.g. /var/www/html/{public,logs,ssl}
 # @break
 ##################################################################################
 vstacklet::webroot::set() {
@@ -499,8 +541,8 @@ vstacklet::webroot::set() {
 ##################################################################################
 # @name: vstacklet::ssh::set (7)
 # @description: set ssh port to custom port (if nothing is set, default port is 22)
-# @option: $1 - -ssh | --ssh_port
-# @arg: $2 - [port] (default: 22) 
+# @option: $1 - `-ssh | --ssh_port` (optional) (default: 22)
+# @arg: $2 - `[port]` (default: 22) - the port to set for ssh
 # @return: none
 # @example: ./vstacklet.sh -ssh 2222
 # ./vstacklet.sh --ssh_port 2222
@@ -540,6 +582,7 @@ vstacklet::block::ssdp() {
 ##################################################################################
 # @name: vstacklet::update::packages (14)
 # @description: This function updates the package list and upgrades the system.
+# @noargs:
 # @nooptions:
 # @return: none
 # @note: This function is required for the installation of
@@ -707,17 +750,17 @@ vstacklet::packages::depends() {
 # @name: vstacklet::packages::keys (8)
 # @description: This function sets the required software package keys
 # and sources for the vStacklet software.
-# @nooptions:
-# @noargs:
-# @return: none
-# @note: This function is required for the installation of
-# the vStacklet software.
-# @note: keys and sources are set for the following software packages:
+# keys and sources are set for the following software packages:
 # - hhvm
 # - nginx
 # - varnish
 # - php
 # - mariadb
+# @nooptions:
+# @noargs:
+# @return: none
+# @note: This function is required for the installation of
+# the vStacklet software.
 # @note: apt-key is being deprecated, use gpg instead
 # @break
 ##################################################################################
@@ -797,19 +840,14 @@ vstacklet::apt::update() {
 ##################################################################################
 # @name: vstacklet::php::install (11)
 # @description: install php and php modules (optional) (default: not installed)
-# @note: versioning
+# versioning
 # - php < "7.4" - not supported, deprecated
 # - php = "7.4" - supported
 # - php = "8.0" - superceded by php="8.1"
 # - php = "8.1" - supported
 # - chose either php or hhvm, not both
-# @option: $1 - `-php | --php`
-# @arg: $2 - `[version]` - `7.4` | `8.1`
-# @example: ./vstacklet.sh -php 8.1
-# ./vstacklet.sh --php 7.4
-# @null:
-# @note: php modules are installed based on the following variables:
-# - -php [php version] (default: 8.1) - php version to install
+# php modules are installed based on the following variables:
+# - `-php [php version]` (default: 8.1) - php version to install
 # - php_modules are installed based on the php version and neccessity
 # - the php_modules installed/enabled on vstacklet are:
 #   - "opcache"
@@ -821,6 +859,11 @@ vstacklet::apt::update() {
 #   - "gmp"
 #   - "bcmath"
 #   - "msgpack"
+# @option: $1 - `-php | --php`
+# @arg: $2 - `[version]` - `7.4` | `8.1`
+# @example: ./vstacklet.sh -php 8.1
+# ./vstacklet.sh --php 7.4
+# @null:
 # @break
 ##################################################################################
 vstacklet::php::install() {
@@ -944,8 +987,8 @@ vstacklet::nginx::install() {
 
 ##################################################################################
 # @name: vstacklet::hhvm::install (13)
-# @description: install hhvm (optional) (default: not installed)
-# @option: $1 - `-hhvm | --hhvm`
+# @description: install hhvm
+# @option: $1 - `-hhvm | --hhvm` (optional) (takes no arguments)
 # @example: ./vstacklet.sh -hhvm 
 # ./vstacklet.sh --hhvm
 # @note: chose either php or hhvm, not both
@@ -998,10 +1041,10 @@ vstacklet::permissions::adjust() {
 
 ##################################################################################
 # @name: vstacklet::varnish::install (15)
-# @description: install varnish (optional)
-# @option: $1 - `-varnish | --varnish`
-# @option: $2 - `-varnishP | --varnish_port`
-# @option: $3 - `-http | --http_port`
+# @description: install varnish and configure
+# @option: $1 - `-varnish | --varnish` (optional) (takes no arguments)
+# @option: $2 - `-varnishP | --varnish_port` (optional) (takes one argument)
+# @option: $3 - `-http | --http_port` (optional) (takes one argument)
 # @example: ./vstacklet.sh -varnish -varnishP 6081 -http 80
 # ./vstacklet.sh --varnish --varnish_port 6081 --http_port 80
 # @null:
@@ -1092,23 +1135,17 @@ vstacklet::ioncube::install() {
 
 ##################################################################################
 # @name: vstacklet::mariadb::install (17)
-# @description: install mariadb (optional)
-# @option: $1 - -mariadb | --mariadb
-# @option: $2 - -mariadbP | --mariadb_port
-# @option: $3 - -mariadbU | --mariadb_user
-# @option: $4 - -mariadbPw | --mariadb_password
-# @arg: $1 - (optional) -mariadb | --mariadb (no argument)
-# @arg: $2 - (optional) [port]
-# @arg: $3 - (optional) [user]
-# @arg: $4 - (optional) [password]
+# @description: install mariadb and configure
+# @option: $1 - -mariadb | --mariadb (optional) (takes no arguments)
+# @option: $2 - -mariadbP | --mariadb_port (optional) (takes one argument)
+# @option: $3 - -mariadbU | --mariadb_user (optional) (takes one argument)
+# @option: $4 - -mariadbPw | --mariadb_password (optional) (takes one argument)
+# @arg: $1 - [port] (optional) (default: 3306)
+# @arg: $2 - [user] (optional) (default: root)
+# @arg: $3 - [password] (optional) (default: password auto-generated)
 # @example: ./vstacklet.sh -mariadb -mariadbP 3306 -mariadbU root -mariadbPw password
 # ./vstacklet.sh --mariadb --mariadb_port 3306 --mariadb_user root --mariadb_password password
 # @null:
-# @note: mariadb is installed based on the following variables:
-# - -mariadb (optional) (default: no)
-# - -mariadbP|--mariadb_port (optional) (default: 3306)
-# - -mariadbU|--mariadb_user (optional) (default: root)
-# - -mariadbPw|--mariadb_password (optional) (default: password auto-generated)
 # @break
 ##################################################################################
 vstacklet::mariadb::install() {
