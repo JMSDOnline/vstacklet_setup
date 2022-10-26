@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1150
+# @version: 3.1.1156
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -43,6 +43,7 @@
 # @description: setup the environment and set variables
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::environment::init() {
 	shopt -s extglob
@@ -122,6 +123,7 @@ vstacklet::environment::init() {
 # @option: `-wp | --wordpress` - nstall WordPress
 #
 # @option: `--reboot` - eboot the server after the installation
+# @break
 ##################################################################################
 vstacklet::args::process() {
 	while [[ $# -gt 0 ]]; do
@@ -274,6 +276,7 @@ Please set an email with ' -e your@email.com '" && vstacklet::clean::rollback 10
 # @description: stage various functions for the setup environment
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::environment::functions() {
 	_warn() {
@@ -315,6 +318,7 @@ vstacklet::environment::functions() {
 # @description: check if the user is root
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::environment::checkroot() {
 	declare -g codename distro
@@ -334,6 +338,7 @@ vstacklet::environment::checkroot() {
 # @description: check if the distro is Ubuntu 18.04/20.04 | Debian 9/10/11
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::environment::checkdistro() {
 	if [[ $(id -u) != 0 ]]; then
@@ -348,6 +353,7 @@ vstacklet::environment::checkdistro() {
 # @description: prints the intro message
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::intro() {
 	echo
@@ -374,6 +380,7 @@ vstacklet::intro() {
 # @nooptions:
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::log::check() {
 	declare -g log_file vslog
@@ -406,9 +413,11 @@ vstacklet::ask::continue() {
 # @name: vstacklet::bashrc::set (4)
 # @description: set ~/.bashrc and ~/.profile for vstacklet
 # @nooptions:
+# @noargs:
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::bashrc::set() {
 	\cp -f "${local_setup_dir}/templates/bashrc.template" /root/.bashrc
@@ -427,8 +436,7 @@ vstacklet::bashrc::set() {
 # @name: vstacklet::hostname::set (5)
 # @description: set system hostname
 # @option: $1 - -hn | --hostname
-# @arg: $2 - [hostname]
-# @return: none
+# @arg: $2 - [hostname] - the hostname to set for the system (optional) 
 # @example: ./vstacklet.sh -hn myhostname 
 # ./vstacklet.sh --hostname myhostname
 # @note:
@@ -438,8 +446,7 @@ vstacklet::bashrc::set() {
 #   - It must not contain consecutive hyphens.
 #   - If hostname is not provided, it will be set to the domain name if provided.
 #   - If domain name is not provided, it will be set to the server hostname.
-##################################################################################
-# @return: none
+# @break
 ##################################################################################
 vstacklet::hostname::set() {
 	if [[ -n ${hostname} ]]; then
@@ -469,6 +476,7 @@ vstacklet::hostname::set() {
 # - if the directory does not exist, it will be created.
 # - if -wr | --web_root is not set, the default directory will be used.
 #   e.g. /var/www/html/{public,logs,ssl}
+# @break
 ##################################################################################
 vstacklet::webroot::set() {
 	if [[ -n ${web_root} ]]; then
@@ -492,11 +500,11 @@ vstacklet::webroot::set() {
 # @name: vstacklet::ssh::set (7)
 # @description: set ssh port to custom port (if nothing is set, default port is 22)
 # @option: $1 - -ssh | --ssh_port
-# @arg: $2 - [port]
+# @arg: $2 - [port] (default: 22) 
 # @return: none
 # @example: ./vstacklet.sh -ssh 2222
 # ./vstacklet.sh --ssh_port 2222
-# @null:
+# @break
 ##################################################################################
 vstacklet::ssh::set() {
 	if [[ -n ${ssh_port} ]]; then
@@ -518,6 +526,7 @@ vstacklet::ssh::set() {
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::block::ssdp() {
 	(
@@ -535,6 +544,7 @@ vstacklet::block::ssdp() {
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::update::packages() {
 	(
@@ -638,6 +648,7 @@ EOF
 # the vStacklet software.
 # @wip: This function is still a work in progress. It is planned
 # to add additional parameters to select the timezone and locale.
+# @break
 ##################################################################################
 vstacklet::locale::set() {
 	echo "${bold}Setting locale to en_US.UTF-8 ...${normal}"
@@ -667,6 +678,7 @@ vstacklet::locale::set() {
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::packages::softcommon() {
 	# package and repo addition (a) _install common properties_
@@ -683,6 +695,7 @@ vstacklet::packages::softcommon() {
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::packages::depends() {
 	# package and repo addition (b) _install softwares and packages_
@@ -706,6 +719,7 @@ vstacklet::packages::depends() {
 # - php
 # - mariadb
 # @note: apt-key is being deprecated, use gpg instead
+# @break
 ##################################################################################
 vstacklet::packages::keys() {
 	# package and repo addition (c) _add signed keys_
@@ -753,6 +767,7 @@ EOF
 # @return: none
 # @note: This function is required for the installation of
 # the vStacklet software.
+# @break
 ##################################################################################
 vstacklet::apt::update() {
 	# package and repo addition (d) _update and upgrade_
@@ -806,6 +821,7 @@ vstacklet::apt::update() {
 #   - "gmp"
 #   - "bcmath"
 #   - "msgpack"
+# @break
 ##################################################################################
 vstacklet::php::install() {
 	if [[ -n ${php} ]]; then
@@ -862,7 +878,7 @@ vstacklet::php::install() {
 # @option: $1 - `-nginx | --nginx`
 # @example: ./vstacklet.sh -nginx
 # ./vstacklet.sh --nginx
-# @null:
+# @break
 ##################################################################################
 vstacklet::nginx::install() {
 	if [[ -n ${nginx} ]]; then
@@ -933,6 +949,7 @@ vstacklet::nginx::install() {
 # @example: ./vstacklet.sh -hhvm 
 # ./vstacklet.sh --hhvm
 # @note: chose either php or hhvm, not both
+# @break
 ##################################################################################
 vstacklet::hhvm::install() {
 	if [[ -n ${hhvm} ]]; then
@@ -962,6 +979,7 @@ vstacklet::hhvm::install() {
 # the vStacklet software.
 # @note: permissions are adjusted based on the following variables:
 # @note: -wr | --web_root
+# @break
 ##################################################################################
 vstacklet::permissions::adjust() {
 	if [[ -n ${web_root} ]]; then
@@ -992,6 +1010,7 @@ vstacklet::permissions::adjust() {
 # - -varnishP|--varnish_port (optional) (default: 6081)
 # - -http|--http_port (optional) (default: 80)
 # @note: chose either varnish or nginx, not both
+# @break
 ##################################################################################
 vstacklet::varnish::install() {
 	if [[ -n ${varnish} ]]; then
@@ -1031,6 +1050,7 @@ vstacklet::varnish::install() {
 # @note: archiving function for memcached as this is handled
 # by the vStacklet::php::install function
 # @todo: remove this function
+# @break
 ##################################################################################
 #function _memcached() {
 #	if [[ ${memcached} == "yes" ]]; then
@@ -1051,6 +1071,7 @@ vstacklet::varnish::install() {
 # @note: ioncube is installed based on the following variables:
 # - -ioncube (optional) (default: no)
 # @todo: add support for ioncube loader for php 7.4/8.1
+# @break
 ##################################################################################
 vstacklet::ioncube::install() {
 	if [[ -n ${ioncube} ]]; then
@@ -1088,6 +1109,7 @@ vstacklet::ioncube::install() {
 # - -mariadbP|--mariadb_port (optional) (default: 3306)
 # - -mariadbU|--mariadb_user (optional) (default: root)
 # - -mariadbPw|--mariadb_password (optional) (default: password auto-generated)
+# @break
 ##################################################################################
 vstacklet::mariadb::install() {
 	if [[ -n ${mariadb} ]]; then
