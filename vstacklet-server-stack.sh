@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1156
+# @version: 3.1.1157
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -94,35 +94,35 @@ vstacklet::environment::init() {
 # @option: `--non-interactive` - run in non-interactive mode
 #
 # @option:  `-e | --email` - mail address to use for the Let's Encrypt SSL certificate
-# @option:  `-p | --password` - assword to use for the MySQL root user
+# @option:  `-p | --password` - password to use for the MySQL root user
 #
-# @option: `-ftp | --ftp_port` - ort to use for the FTP server
-# @option: `-ssh | --ssh_port` - ort to use for the SSH server
-# @option: `-http | --http_port` - ort to use for the HTTP server
-# @option: `-https | --https_port` - ort to use for the HTTPS server
-# @option: `-mysql | --mysql_port` - ort to use for the MySQL server
-# @option: `-varnishP | --varnish_port` - ort to use for the Varnish server
+# @option: `-ftp | --ftp_port` - port to use for the FTP server
+# @option: `-ssh | --ssh_port` - port to use for the SSH server
+# @option: `-http | --http_port` - port to use for the HTTP server
+# @option: `-https | --https_port` - port to use for the HTTPS server
+# @option: `-mysql | --mysql_port` - port to use for the MySQL server
+# @option: `-varnishP | --varnish_port` - port to use for the Varnish server
 #
-# @option: `-hn | --hostname` - ostname to use for the server
-# @option: `-dmn | --domain` - omain name to use for the server
+# @option: `-hn | --hostname` - hostname to use for the server
+# @option: `-dmn | --domain` - domain name to use for the server
 #
-# @option: `-php | --php` - HP version to install (7.4, 8.1)
-# @option: `-mc | --memcached` - nstall Memcached
-# @option: `-nginx | --nginx` - nstall Nginx
-# @option: `-varnish | --varnish` - nstall Varnish
-# @option: `-hhvm | --hhvm` - nstall HHVM
+# @option: `-php | --php` - PHP version to install (7.4, 8.1)
+# @option: `-mc | --memcached` - install Memcached
+# @option: `-nginx | --nginx` - install Nginx
+# @option: `-varnish | --varnish` - install Varnish
+# @option: `-hhvm | --hhvm` - install HHVM
 #
-# @option: `-mdb | --mariadb` - nstall MariaDB
-# @option: `-rdb | --redis` - nstall Redis
+# @option: `-mdb | --mariadb` - install MariaDB
+# @option: `-rdb | --redis` - install Redis
 #
-# @option: `-pma | --phpmyadmin` - nstall phpMyAdmin
-# @option: `-csf | --csf` - nstall CSF firewall
-# @option: `-sendmail | --sendmail` - nstall Sendmail
+# @option: `-pma | --phpmyadmin` - install phpMyAdmin
+# @option: `-csf | --csf` - install CSF firewall
+# @option: `-sendmail | --sendmail` - install Sendmail
 #
-# @option: `-wr | --web_root` - he web root directory to use for the server
-# @option: `-wp | --wordpress` - nstall WordPress
+# @option: `-wr | --web_root` - the web root directory to use for the server
+# @option: `-wp | --wordpress` - install WordPress
 #
-# @option: `--reboot` - eboot the server after the installation
+# @option: `--reboot` - reboot the server after the installation
 # @break
 ##################################################################################
 vstacklet::args::process() {
