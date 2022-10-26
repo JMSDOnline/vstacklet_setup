@@ -1,13 +1,33 @@
 #!/bin/bash
+################################################################################
+# <START METADATA>
+# @file_name: vstacklet-server-stack.sh
+# @version: 3.1.1001
+# @description: Lightweight script to quickly install a LEMP stack with Nginx, 
+# Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
+# and more on a fresh Ubuntu 18.04/20.04 or
+# Debian 9/10/11 server for website-based server applications.
+# @project_name: vstacklet
 #
-# [VStacklet Varnish LEMP Stack Installation Script]
+# @save_tasks:
+#  automated_versioning: true
+#  automated_documentation: true
 #
-# GitHub:   https://github.com/JMSDOnline/vstacklet
-# Author:   Jason Matthews
+# @build_tasks:
+#  automated_comment_strip: false
+#  automated_encryption: false
 #
+# @author: Jason Matthews (JMSolo)
+# @author_contact: https://github.com/JMSDOnline/vstacklet
+#
+# @license: MIT License (Included in LICENSE)
+# Copyright (C) 2016-2022, Jason Matthews
+# All rights reserved.
+# <END METADATA>
+################################################################################
 # shellcheck disable=1091,2068,2312
-#2034
-# This script is designed to be run on a fresh Ubuntu 20.04 LTS server.
+# This script is designed to be run on a fresh Ubuntu 18.04/20.04 or
+# Debian 9/10/11 server.
 # It will install and configure the following:
 #   - Nginx
 #   - PHP 7.4 (FPM) with common extensions
@@ -16,7 +36,7 @@
 #   - Varnish
 #   - CSF Firewall
 #   - and more...
-##################################################################################
+################################################################################
 
 ##################################################################################
 # @name: vstacklet::environment::init
