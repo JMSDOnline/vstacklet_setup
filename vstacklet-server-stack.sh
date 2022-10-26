@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1170
+# @version: 3.1.1171
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -478,17 +478,16 @@ vstacklet::bashrc::set() {
 ##################################################################################
 # @name: vstacklet::hostname::set (5)
 # @description: set system hostname
-# @option: $1 - `-h | --hostname` (optional) (takes one argument)
-# @arg: $2 - `[hostname]` - the hostname to set for the system (optional) 
-# @example: ./vstacklet.sh -h myhostname 
-# ./vstacklet.sh --hostname myhostname
-# @note:
 # - hostname must be a valid hostname.
 #   - It can contain only letters, numbers, and hyphens.
 #   - It must start with a letter and end with a letter or number.
 #   - It must not contain consecutive hyphens.
 #   - If hostname is not provided, it will be set to the domain name if provided.
 #   - If domain name is not provided, it will be set to the server hostname.
+# @option: $1 - `-h | --hostname` (optional) (takes one argument)
+# @arg: $2 - `[hostname]` - the hostname to set for the system (optional) 
+# @example: ./vstacklet.sh -h myhostname 
+# ./vstacklet.sh --hostname myhostname
 # @break
 ##################################################################################
 vstacklet::hostname::set() {
