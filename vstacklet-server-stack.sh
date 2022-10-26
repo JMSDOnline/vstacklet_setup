@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1078
+# @version: 3.1.1142
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -370,7 +370,8 @@ vstacklet::intro() {
 ##################################################################################
 # @name: vstacklet::log::check (2)
 # @description: check if the log file exists and create it if it doesn't
-# @args: $1 - log file
+# @noargs:
+# @noparams:
 # @note: This function is required for the installation of
 # the vStacklet software.
 ##################################################################################
@@ -491,7 +492,9 @@ vstacklet::webroot::set() {
 # @param: $1 - -ssh | --ssh_port
 # @param: $2 - [port]
 # @return: none
-# @example: ./vstacklet.sh -ssh 2222 (or) ./vstacklet.sh --ssh_port 2222
+# @example: ./vstacklet.sh -ssh 2222
+# ./vstacklet.sh --ssh_port 2222
+# @null:
 ##################################################################################
 vstacklet::ssh::set() {
 	if [[ -n ${ssh_port} ]]; then
@@ -787,6 +790,7 @@ vstacklet::apt::update() {
 # @param: $2 - `[version]` - `7.4` | `8.1`
 # @example: ./vstacklet.sh -php 8.1
 # ./vstacklet.sh --php 7.4
+# @null:
 # @note: php modules are installed based on the following variables:
 # - -php [php version] (default: 8.1) - php version to install
 # - php_modules are installed based on the php version and neccessity
@@ -856,6 +860,7 @@ vstacklet::php::install() {
 # @param: $1 - `-nginx | --nginx`
 # @example: ./vstacklet.sh -nginx
 # ./vstacklet.sh --nginx
+# @null:
 ##################################################################################
 vstacklet::nginx::install() {
 	if [[ -n ${nginx} ]]; then
@@ -979,6 +984,7 @@ vstacklet::permissions::adjust() {
 # @param: $3 - `-http | --http_port`
 # @example: ./vstacklet.sh -varnish -varnishP 6081 -http 80
 # ./vstacklet.sh --varnish --varnish_port 6081 --http_port 80
+# @null:
 # @note: varnish is installed based on the following variables:
 # - -varnish (optional) (default: nginx)
 # - -varnishP|--varnish_port (optional) (default: 6081)
@@ -1038,7 +1044,8 @@ vstacklet::varnish::install() {
 # @description: install ioncube (optional)
 # @param: $1 - -ioncube | --ioncube
 # @example: ./vstacklet.sh -ioncube
-# (or) ./vstacklet.sh --ioncube
+# ./vstacklet.sh --ioncube
+# @null:
 # @note: ioncube is installed based on the following variables:
 # - -ioncube (optional) (default: no)
 # @todo: add support for ioncube loader for php 7.4/8.1
