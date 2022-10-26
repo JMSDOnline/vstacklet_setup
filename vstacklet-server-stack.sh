@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1147
+# @version: 3.1.1150
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -1069,10 +1069,30 @@ vstacklet::ioncube::install() {
 	fi
 }
 
-function _mariadb() {
-	if [[ ${mariadb} == "yes" ]]; then
+##################################################################################
+# @name: vstacklet::mariadb::install (17)
+# @description: install mariadb (optional)
+# @option: $1 - -mariadb | --mariadb
+# @option: $2 - -mariadbP | --mariadb_port
+# @option: $3 - -mariadbU | --mariadb_user
+# @option: $4 - -mariadbPw | --mariadb_password
+# @arg: $1 - (optional) -mariadb | --mariadb (no argument)
+# @arg: $2 - (optional) [port]
+# @arg: $3 - (optional) [user]
+# @arg: $4 - (optional) [password]
+# @example: ./vstacklet.sh -mariadb -mariadbP 3306 -mariadbU root -mariadbPw password
+# ./vstacklet.sh --mariadb --mariadb_port 3306 --mariadb_user root --mariadb_password password
+# @null:
+# @note: mariadb is installed based on the following variables:
+# - -mariadb (optional) (default: no)
+# - -mariadbP|--mariadb_port (optional) (default: 3306)
+# - -mariadbU|--mariadb_user (optional) (default: root)
+# - -mariadbPw|--mariadb_password (optional) (default: password auto-generated)
+##################################################################################
+vstacklet::mariadb::install() {
+	if [[ -n ${mariadb} ]]; then
 		export DEBIAN_FRONTEND=noninteractive
-		apt-get -y install mariadb-server >>"${OUTTO}" 2>&1
+		apt-get -y install mariadb-server >>"${vslog}" 2>&1
 		echo "${OK}"
 	fi
 }
