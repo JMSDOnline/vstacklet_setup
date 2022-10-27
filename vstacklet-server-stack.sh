@@ -194,13 +194,14 @@ vstacklet::args::process() {
 			declare -g mariadb_password="${2}"
 			shift
 			shift
+			[[ -n ${mariadb_password} && ${#mariadb_password} -lt 8 ]] && _error "The MariaDB password must be at least 8 characters long." && vstacklet::clean::rollback 6
 			;;
 		-mariadbP* | --mariadb_port*)
 			declare -gi mariadb_port="${2}"
 			shift
 			shift
-			[[ -n ${mariadb_port} && ${mariadb_port} != ?(-)+([0-9]) ]] && vstacklet::clean::rollback 6
-			[[ -n ${mariadb_port} && ${mariadb_port} -lt 1 || ${mariadb_port} -gt 65535 ]] && _error "Invalid MariaDB port number. Please enter a number between 1 and 65535." && vstacklet::clean::rollback 6
+			[[ -n ${mariadb_port} && ${mariadb_port} != ?(-)+([0-9]) ]] && vstacklet::clean::rollback 7
+			[[ -n ${mariadb_port} && ${mariadb_port} -lt 1 || ${mariadb_port} -gt 65535 ]] && _error "Invalid MariaDB port number. Please enter a number between 1 and 65535." && vstacklet::clean::rollback 7
 			[[ -z ${mariadb_port} ]] && declare -gi mariadb_port="3306"
 			;;
 		-mc | --memcached)
@@ -220,12 +221,14 @@ vstacklet::args::process() {
 			declare -g mysql_password="${2}"
 			shift
 			shift
+			[[ -n ${mysql_password} && ${#mysql_password} -lt 8 ]] && _error "The MySQL password must be at least 8 characters long." && vstacklet::clean::rollback 8
 			;;
 		-mysqlP* | --mysql_port*)
 			declare -gi mysql_port="${2}"
 			shift
 			shift
-			[[ -n ${mysql_port} && ${mysql_port} != ?(-)+([0-9]) ]] && vstacklet::clean::rollback 6
+			[[ -n ${mysql_port} && ${mysql_port} != ?(-)+([0-9]) ]] && _error "The MySQL port must be a number." && vstacklet::clean::rollback 9
+			[[ -n ${mysql_port} && ${mysql_port} -lt 1 || ${mysql_port} -gt 65535 ]] && _error "Invalid MySQL port number. Please enter a number between 1 and 65535." && vstacklet::clean::rollback 9
 			[[ -z ${mysql_port} ]] && declare -gi mysql_port="3306"
 			;;
 		-nginx | --nginx)
@@ -244,6 +247,11 @@ vstacklet::args::process() {
 			declare -gi php="${2}"
 			shift
 			shift
+			[[ -n ${php} && ${php} != "7" && ${php} != "8" && ${php} != "7.4" && ${php} != "8.1"  ]] && _error "Invalid PHP version. Please enter either 7 (7.4), or 8 (8.4)." && vstacklet::clean::rollback 10
+			[[ -n ${php} && ${php} -lt 1 || ${php} -gt 9 ]] && _error "Invalid PHP version. Please enter a number between 1 and 9." && vstacklet::clean::rollback 10
+			[[ ${php} == *"7"* ]] && declare -gi php="7.4"
+			[[ ${php} == *"8"* ]] && declare -gi php="8.1"
+			[[ -z ${php} ]] && declare -gi php="8.1"
 			;;
 		-p* | --password*)
 			declare -g password="${2}"
@@ -255,14 +263,16 @@ vstacklet::args::process() {
 			declare -gi https_port="${2}"
 			shift
 			shift
-			[[ -n ${https_port} && ${https_port} != ?(-)+([0-9]) ]] && vstacklet::clean::rollback 8
+			[[ -n ${https_port} && ${https_port} != ?(-)+([0-9]) ]] && _error "The HTTPS port must be a number." && vstacklet::clean::rollback 11
+			[[ -n ${https_port} && ${https_port} -lt 1 || ${https_port} -gt 65535 ]] && _error "Invalid HTTPS port number. Please enter a number between 1 and 65535." && vstacklet::clean::rollback 11
 			[[ -z ${https_port} ]] && declare -gi https_port="443"
 			;;
 		-http* | --http_port*)
 			declare -gi http_port="${2}"
 			shift
 			shift
-			[[ -n ${http_port} && ${http_port} != ?(-)+([0-9]) ]] && vstacklet::clean::rollback 9
+			[[ -n ${http_port} && ${http_port} != ?(-)+([0-9]) ]] && _error "The HTTP port must be a number." && vstacklet::clean::rollback 12
+			[[ -n ${http_port} && ${http_port} -lt 1 || ${http_port} -gt 65535 ]] && _error "Invalid HTTP port number. Please enter a number between 1 and 65535." && vstacklet::clean::rollback 12
 			[[ -z ${http_port} ]] && declare -gi http_port="80"
 			;;
 		-redis | --redis)
@@ -273,14 +283,14 @@ vstacklet::args::process() {
 			declare -gi sendmail="1"
 			shift
 			[[ -z ${email} ]] && _error "An email is needed to register the server aliases.
-Please set an email with ' -e your@email.com '" && vstacklet::clean::rollback 10
+Please set an email with ' -e your@email.com '" && vstacklet::clean::rollback 13
 			;;
 		-ssh* | --ssh_port*)
 			declare -gi ssh_port="${2}"
 			shift
 			shift
-			[[ -n ${ssh_port} && ${ssh_port} != ?(-)+([0-9]) ]] && vstacklet::clean::rollback 11
-			[[ -n ${ssh_port} && ${ssh_port} -lt 1 || ${ssh_port} -gt 65535 ]] && _error "Invalid SSH port number. Please enter a number between 1 and 65535." && vstacklet::clean::rollback 11
+			[[ -n ${ssh_port} && ${ssh_port} != ?(-)+([0-9]) ]] && _error "The SSH port must be a number." && vstacklet::clean::rollback 14
+			[[ -n ${ssh_port} && ${ssh_port} -lt 1 || ${ssh_port} -gt 65535 ]] && _error "Invalid SSH port number. Please enter a number between 1 and 65535." && vstacklet::clean::rollback 14
 			[[ -z ${ssh_port} ]] && declare -gi ssh_port="22"
 			;;
 		-varnish | --varnish)
@@ -291,14 +301,15 @@ Please set an email with ' -e your@email.com '" && vstacklet::clean::rollback 10
 			declare -gi varnish_port="${2}"
 			shift
 			shift
-			[[ -n ${varnish_port} && ${varnish_port} != ?(-)+([0-9]) ]] && vstacklet::clean::rollback 12
+			[[ -n ${varnish_port} && ${varnish_port} != ?(-)+([0-9]) ]] && _error "The Varnish port must be a number." && vstacklet::clean::rollback 15
+			[[ -n ${varnish_port} && ${varnish_port} -lt 1 || ${varnish_port} -gt 65535 ]] && _error "Invalid Varnish port number. Please enter a number between 1 and 65535." && vstacklet::clean::rollback 15
 			[[ -z ${varnish_port} ]] && declare -gi varnish_port=6081
 			;;
 		-wr* | --web_root*)
 			declare -g web_root="${2}"
 			shift
 			shift
-			[[ -n ${web_root} && $(sed -e 's/[\\/]/\\/g;s/[\/\/]/\\\//g;' <<<"${web_root}") == "" ]] && vstacklet::clean::rollback 13
+			[[ -n ${web_root} && $(sed -e 's/[\\/]/\\/g;s/[\/\/]/\\\//g;' <<<"${web_root}") == "" ]] && _error "Invalid web root. Please enter a valid path. (ex: /var/www/html)" && vstacklet::clean::rollback 16
 			[[ -z ${web_root} ]] && declare -g web_root="/var/www/html"
 			;;
 		-wp | --wordpress)
