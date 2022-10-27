@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1189
+# @version: 3.1.1202
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -75,9 +75,6 @@ vstacklet::environment::init() {
 	normal=$(tput sgr0)
 	title=${standout}
 	repo_title=${black}${on_green}
-	#################################################################################
-	_string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15; }
-	#################################################################################
 }
 
 ##################################################################################
@@ -129,8 +126,8 @@ vstacklet::environment::init() {
 # @option: `--reboot` - reboot the server after the installation
 ##################################################################################
 # @example: ./vstacklet.sh --help
-# @example: ./vstacklet.sh -e "youremail.com" -ftp 2133 -ssh 2244 -http 80 -https 443 -h "yourhostname" -d "yourdomain.com" -php 8.1 -mc -nginx -mariadb -mariadbP "3309" -mariadbU "user" -mariadbPw "mariadbpasswd" -pma -csf -sendmail -wr "/var/www/html" -wp
-# @example: ./vstacklet.sh -e "youremail.com" -ftp 2133 -ssh 2244 -http 80 -https 443 -h "yourhostname" -d "yourdomain.com" -hhvm -mc -nginx -mariadb -mariadbP "3309" -mariadbU "user" -mariadbPw "mariadbpasswd" -pma -sendmail -wr "/var/www/html" -wp --reboot
+# @example: ./vstacklet.sh -e "youremail.com" -ftp 2133 -ssh 2244 -http 80 -https 443 -h "yourhostname" -d "yourdomain.com" -php 8.1 -mc -ioncube -nginx -mariadb -mariadbP "3309" -mariadbU "user" -mariadbPw "mariadbpasswd" -pma -csf -sendmail -wr "/var/www/html" -wp
+# @example: ./vstacklet.sh -e "youremail.com" -ftp 2133 -ssh 2244 -http 80 -https 443 -h "yourhostname" -d "yourdomain.com" -hhvm -nginx -mariadb -mariadbP "3309" -mariadbU "user" -mariadbPw "mariadbpasswd" -pma -sendmail -wr "/var/www/html" -wp --reboot
 # @break
 ##################################################################################
 vstacklet::args::process() {
@@ -246,6 +243,7 @@ vstacklet::args::process() {
 			shift
 			;;
 		-php* | --php*)
+			declare -gi php_set="1"
 			declare -gi php="${2}"
 			shift
 			shift
@@ -254,6 +252,10 @@ vstacklet::args::process() {
 			[[ ${php} == *"7"* ]] && declare -gi php="7.4"
 			[[ ${php} == *"8"* ]] && declare -gi php="8.1"
 			[[ -z ${php} ]] && declare -gi php="8.1"
+			;;
+		-ioncube | --ioncube)
+			declare -gi ioncube="1"
+			shift
 			;;
 		-https* | --https_port*)
 			declare -gi https_port="${2}"
@@ -873,7 +875,7 @@ vstacklet::apt::update() {
 # @break
 ##################################################################################
 vstacklet::php::install() {
-	if [[ -n ${php} ]]; then
+	if [[ -n ${php} && ${php_set} == "1" ]]; then
 		# php version sanity check
 		[[ ${php} == *"8"* ]] && php="8.1"
 		[[ ${php} == *"7"* ]] && php="7.4"
@@ -981,7 +983,7 @@ vstacklet::nginx::install() {
 			chmod -R g+rw "${web_root}"
 			sh -c 'find "${web_root}" -type d -print0 | sudo xargs -0 chmod g+s'
 		else
-			echo '<?php phpinfo(); ?>' >/var/www/html/checkinfo.php
+			echo '<?php phpinfo(); ?>' >/var/www/html/public/checkinfo.php
 			chown -R www-data:www-data /var/www/html
 			chmod -R 755 /var/www/html
 			chmod -R g+rw /var/www/html
@@ -1012,8 +1014,8 @@ vstacklet::hhvm::install() {
 		}
 		/usr/bin/update-alternatives --install /usr/bin/php php /usr/bin/hhvm 60 >>"${vslog}" 2>&1
 		# get off the port and use socket - vStacklet nginx configurations already know this
-		cp "${local_hhvm_dir}server.ini.template" /etc/hhvm/server.ini
-		cp "${local_hhvm_dir}php.ini.template" /etc/hhvm/php.ini
+		cp -f "${local_hhvm_dir}server.ini.template" /etc/hhvm/server.ini
+		cp -f "${local_hhvm_dir}php.ini.template" /etc/hhvm/php.ini
 		echo "${OK}"
 	fi
 }
@@ -1239,10 +1241,131 @@ vstacklet::mariadb::install() {
 			echo -e "socket = /var/run/mysqld/mysqld.sock"
 			echo -e "bind-address = 127.0.0.1"
 
-		} >/etc/mysql/conf.d/vstacklet.cnf
+		} >/etc/mysql/conf.d/vstacklet.cnf || {
+			_warn "Failed to set MariaDB client and server configuration" 
+			vstacklet::clean::rollback 
+		} 
+		echo "configuration file saved to /etc/mysql/conf.d/vstacklet.cnf"
+		echo "mariaDB client and server configuration set to:"
+		cat /etc/mysql/conf.d/vstacklet.cnf
+		echo "mariadb root password: ${mariadb_password}"
+		echo "mariadb user: ${mariadb_user}"
+		echo "mariadb port: ${mariadb_port}"
+		echo
 		echo "${OK}"
 	fi
 }
+
+##################################################################################
+# @name: vstacklet::phpmyadmin::install (18)
+# @description: install phpmyadmin and configure
+# @option: $1 - `-phpmyadmin | --phpmyadmin` (optional) (takes no arguments)
+# @option: $2 - `-phpmyadminP | --phpmyadmin_port` (optional) (takes one argument)
+# @option: $3 - `-phpmyadminU | --phpmyadmin_user` (optional) (takes one argument)
+# @option: $4 - `-phpmyadminPw | --phpmyadmin_password` (optional) (takes one argument)
+# @arg: $2 - `[port]` (optional) (default: 8080)
+# @arg: $3 - `[user]` (optional) (default: root)
+# @arg: $4 - `[password]` (optional) (default: password auto-generated)
+# @example: ./vstacklet.sh -phpmyadmin -phpmyadminP 8080 -phpmyadminU root -phpmyadminPw password
+# ./vstacklet.sh --phpmyadmin --phpmyadmin_port 8080 --phpmyadmin_user root --phpmyadmin_password password
+# @break
+##################################################################################
+vstacklet::phpmyadmin::install() {
+	if [[ -n ${phpmyadmin} && -n ${mariadb} || ${mysql} ]]; then
+		declare pma_version=$(curl -s https://www.phpmyadmin.net/home_page/version.json | jq -r '.version')
+		[[ -n ${http_port} ]] && phpmyadmin_port=${http_port}
+		[[ -z ${http_port} ]] && phpmyadmin_port=80
+		[[ -n ${mariadb} || -n ${mysql} && -z ${mariadb_user} || -z ${mysql_user} ]] && phpmyadmin_user="root"
+		[[ -n ${mariadb} || -n ${mysql} && -z ${mariadb_password} || -z ${mysql_password} ]] && phpmyadmin_password=$(perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15)
+		[[ -n ${domain} ]] && phpmyadmin_domain=${domain}
+		[[ -z ${domain} ]] && phpmyadmin_domain=${server_ip}
+		pma_bf=$(perl -le 'print map { (a..z,A..Z,0..9)[rand 62] } 0..31')
+		echo -n "${green}Installing phpMyAdmin${normal} ... "
+		(
+			DEBIAN_FRONTEND=noninteractive apt-get --allow-unauthenticated -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install phpmyadmin
+		) >>"${vslog}" 2>&1 || {
+			_warn "Failed to install phpMyAdmin"
+			exit 1
+		}
+		cd /usr/share || {
+			_warn "Failed to change directory to /usr/share"
+			exit 1
+		}
+		rm -rf phpmyadmin || {
+			_warn "Failed to remove phpmyadmin"
+			exit 1
+		}
+		wget https://files.phpmyadmin.net/phpMyAdmin/${pma_version}/phpMyAdmin-${pma_version}-all-languages.tar.gz >>"${vslog}" 2>&1 || {
+			_warn "Failed to download phpMyAdmin"
+			exit 1
+		}
+		tar -xzf phpMyAdmin-${pma_version}-all-languages.tar.gz >>"${vslog}" 2>&1 || {
+			_warn "Failed to extract phpMyAdmin"
+			exit 1
+		}
+		mv phpMyAdmin-${pma_version}-all-languages phpmyadmin || {
+			_warn "Failed to rename phpMyAdmin"
+			exit 1
+		}
+		rm -rf phpMyAdmin-${pma_version}-all-languages.tar.gz || {
+			_warn "Failed to remove phpMyAdmin"
+			exit 1
+		}
+		mkdir -p /var/lib/phpmyadmin/tmp || {
+			_warn "Failed to create directory /var/lib/phpmyadmin/tmp"
+			exit 1
+		}
+		[[ -n ${web_root} ]] && ln -sf /usr/share/phpmyadmin "${web_root}/public" || {
+			_warn "Failed to create symlink to phpmyadmin"
+			exit 1
+		}
+		[[ -z ${web_root} ]] && ln -sf /usr/share/phpmyadmin /var/www/html/public || {
+			_warn "Failed to create symlink to phpmyadmin"
+			exit 1
+		}
+		# configure phpmyadmin
+		echo -n "${green}Configuring phpMyAdmin${normal} ... "
+		# set phpmyadmin configuration
+		{
+			echo -e "<?php"
+			echo -e "/* Servers configuration */"
+			echo -e "\$i = 0;"
+			echo -e "/* Server: localhost [1] */"
+			echo -e "\$i++;"
+			echo -e "\$cfg['Servers'][\$i]['verbose'] = 'localhost';"
+			echo -e "\$cfg['Servers'][\$i]['host'] = 'localhost';"
+			echo -e "\$cfg['Servers'][\$i]['port'] = '${mariadb_port}';"
+			echo -e "\$cfg['Servers'][\$i]['socket'] = '';"
+			echo -e "\$cfg['Servers'][\$i]['connect_type'] = 'tcp';"
+			echo -e "\$cfg['Servers'][\$i]['extension'] = 'mysqli';"
+			echo -e "\$cfg['Servers'][\$i]['compress'] = false;"
+			echo -e "\$cfg['Servers'][\$i]['auth_type'] = 'cookie';"
+			echo -e "\$cfg['Servers'][\$i]['user'] = '${phpmyadmin_user}';"
+			echo -e "\$cfg['Servers'][\$i]['password'] = '${phpmyadmin_password}';"
+			echo -e "\$cfg['Servers'][\$i]['AllowNoPassword'] = false;"
+			echo -e "/* End of servers configuration */"
+			echo -e "\$cfg['blowfish_secret'] = '${pma_bf}';"
+			echo -e "\$cfg['DefaultLang'] = 'en';"
+			echo -e "\$cfg['ServerDefault'] = 1;"
+			echo -e "\$cfg['UploadDir'] = '';"
+			echo -e "\$cfg['SaveDir'] = '';"
+			echo -e "?>"
+		} >/etc/phpmyadmin/config.inc.php || { 
+			_warn "Failed to set phpMyAdmin configuration" 
+			vstacklet::clean::rollback 
+		}
+		echo "configuration file saved to /etc/phpmyadmin/config.inc.php"
+		echo "Access phpMyAdmin at http://${phpmyadmin_domain}:${phpmyadmin_port}/phpmyadmin"
+		echo "phpmyadmin user: ${phpmyadmin_user}"
+		echo "phpmyadmin password: ${phpmyadmin_password}"
+		echo "phpmyadmin port: ${phpmyadmin_port}"
+		echo
+		echo "${OK}"
+		else
+		_warn "phpMyAdmin requires MariaDB or MySQL" && vstacklet::clean::rollback
+	fi
+}
+
 
 function _phpmyadmin() {
 	if [[ ${phpmyadmin} == "yes" ]]; then
@@ -1277,7 +1400,7 @@ function _phpmyadmin() {
 			ln -sf /usr/share/phpmyadmin "/srv/www/${site_path}/public"
 		else
 			# create a sym-link to live directory.
-			ln -sf /usr/share/phpmyadmin "/srv/www/${hostname1}/public"
+			ln -sf /usr/share/phpmyadmin "/srv/www/${hostname1}/public/phpmyadmin"
 		fi
 		echo "${OK}"
 		# show phpmyadmin creds
