@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1171
+# @version: 3.1.1173
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -749,12 +749,12 @@ vstacklet::packages::depends() {
 # @name: vstacklet::packages::keys (8)
 # @description: This function sets the required software package keys
 # and sources for the vStacklet software.
-# keys and sources are set for the following software packages:
-# - hhvm
-# - nginx
-# - varnish
-# - php
-# - mariadb
+# - keys and sources are set for the following software packages:
+#   - hhvm (only if option `-hhvm|--hhvm` is set)
+#   - nginx (only if option `-nginx|--nginx` is set)
+#   - varnish (only if option `-varnish|--varnish` is set)
+#   - php (only if option `-php|--php` is set)
+#   - mariadb (only if option `-mariadb|--mariadb` is set)
 # @nooptions:
 # @noargs:
 # @return: none
@@ -845,9 +845,9 @@ vstacklet::apt::update() {
 # - php = "8.0" - superceded by php="8.1"
 # - php = "8.1" - supported
 # - chose either php or hhvm, not both
-# php modules are installed based on the following variables:
-# - `-php [php version]` (default: 8.1) - php version to install
-# - php_modules are installed based on the php version and neccessity
+# - php modules are installed based on the following variables:
+#   - `-php [php version]` (default: 8.1) - php version to install
+#   - php_modules are installed based on the php version and neccessity
 # - the php_modules installed/enabled on vstacklet are:
 #   - "opcache"
 #   - "xml"
