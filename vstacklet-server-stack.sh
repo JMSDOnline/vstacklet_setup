@@ -129,6 +129,10 @@ vstacklet::environment::init() {
 # @option: `-wp | --wordpress` - install WordPress
 #
 # @option: `--reboot` - reboot the server after the installation
+##################################################################################
+# @example: ./vstacklet.sh --help
+# @example: ./vstacklet.sh -e "youremail.com" -ftp 2133 -ssh 2244 -http 80 -https 443 -h "yourhostname" -d "yourdomain.com" -php 8.1 -mc -nginx -mariadb -mariadbP "3309" -mariadbU "user" -mariadbPw "mariadbpasswd" -pma -csf -sendmail -wr "/var/www/html" -wp
+# @example: ./vstacklet.sh -e "youremail.com" -ftp 2133 -ssh 2244 -http 80 -https 443 -h "yourhostname" -d "yourdomain.com" -hhvm -mc -nginx -mariadb -mariadbP "3309" -mariadbU "user" -mariadbPw "mariadbpasswd" -pma -sendmail -wr "/var/www/html" -wp --reboot
 # @break
 ##################################################################################
 vstacklet::args::process() {
