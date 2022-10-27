@@ -2,7 +2,7 @@
 ################################################################################
 # <START METADATA>
 # @file_name: vstacklet-server-stack.sh
-# @version: 3.1.1173
+# @version: 3.1.1189
 # @description: Lightweight script to quickly install a LEMP stack with Nginx, 
 # Varnish, PHP7.4/8.1 (PHP-FPM), OPCode Cache, IonCube Loader, MariaDB, Sendmail 
 # and more on a fresh Ubuntu 18.04/20.04 or
@@ -85,7 +85,6 @@ vstacklet::environment::init() {
 # @description: process the options and values passed to the script
 # @option: $1 - the option/flag to process
 # @arg: $2 - the value of the option/flag
-# @example: ./vstacklet.sh "-e" "your@email.com" "-php" "8.1" "-nginx" "-mdb" "-pma" "-sendmail" "-wr" "[directory_name]"
 # @note: This function is required for the installation of
 # the vStacklet software.
 ##################################################################################
@@ -94,7 +93,6 @@ vstacklet::environment::init() {
 # @option: `--non-interactive` - run in non-interactive mode
 #
 # @option: `-e | --email` - mail address to use for the Let's Encrypt SSL certificate
-# @option: `-p | --password` - password to use for the MySQL root user
 #
 # @option: `-ftp | --ftp_port` - port to use for the FTP server
 # @option: `-ssh | --ssh_port` - port to use for the SSH server
@@ -256,12 +254,6 @@ vstacklet::args::process() {
 			[[ ${php} == *"7"* ]] && declare -gi php="7.4"
 			[[ ${php} == *"8"* ]] && declare -gi php="8.1"
 			[[ -z ${php} ]] && declare -gi php="8.1"
-			;;
-		-p* | --password*)
-			declare -g password="${2}"
-			shift
-			shift
-			[[ ${password} =~ ['!@#$%^&*()_+'] ]] && vstacklet::clean::rollback 7
 			;;
 		-https* | --https_port*)
 			declare -gi https_port="${2}"
@@ -877,7 +869,7 @@ vstacklet::apt::update() {
 # @arg: $2 - `[version]` - `7.4` | `8.1`
 # @example: ./vstacklet.sh -php 8.1
 # ./vstacklet.sh --php 7.4
-# @null:
+# @null
 # @break
 ##################################################################################
 vstacklet::php::install() {
@@ -1059,9 +1051,14 @@ vstacklet::permissions::adjust() {
 # @option: $1 - `-varnish | --varnish` (optional) (takes no arguments)
 # @option: $2 - `-varnishP | --varnish_port` (optional) (takes one argument)
 # @option: $3 - `-http | --http_port` (optional) (takes one argument)
+# @option: $4 - `-https | --https_port` (optional) (takes one argument)
+# @arg: $2 - `[varnish_port_number]` (optional) (default: 6081)
+# @arg: $3 - `[http_port_number]` (optional) (default: 80)
+# @arg: $4 - `[https_port_number]` (optional) (default: 443)
 # @example: ./vstacklet.sh -varnish -varnishP 6081 -http 80
 # ./vstacklet.sh --varnish --varnish_port 6081 --http_port 80
-# @null:
+# ./vstacklet.sh -varnish -varnishP 6081 -http 80 -https 443
+# @null
 # @note: varnish is installed based on the following variables:
 # - -varnish (optional) (default: nginx)
 # - -varnishP|--varnish_port (optional) (default: 6081)
@@ -1121,28 +1118,65 @@ vstacklet::varnish::install() {
 ##################################################################################
 # @name: vstacklet::ioncube::install (16)
 # @description: install ioncube (optional)
+# - the ioncube loader will be available for the php version specified
+# from the `-php | --php` option.
 # @option: $1 - `-ioncube | --ioncube` (optional) (takes no arguments)
-# @example: ./vstacklet.sh -ioncube
-# ./vstacklet.sh --ioncube
-# @null:
-# @note: ioncube is installed based on the following variables:
-# - -ioncube (optional) (default: no)
-# @todo: add support for ioncube loader for php 7.4/8.1
+# @example: ./vstacklet.sh -ioncube -php 8.1
+# ./vstacklet.sh --ioncube --php 8.1
+# ./vstacklet.sh -ioncube -php 7.4
+# ./vstacklet.sh --ioncube --php 7.4
 # @break
 ##################################################################################
 vstacklet::ioncube::install() {
 	if [[ -n ${ioncube} ]]; then
 		echo -n "${green}Installing IonCube Loader${normal} ... "
-		mkdir -p /tmp 2>&1
-		cd /tmp || _error "Could not change directory to /tmp" && exit 1
-		wget http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz >/dev/null 2>&1
-		tar xvfz ioncube_loaders_lin_x86-64.tar.gz >/dev/null 2>&1
-		cd ioncube || _error "ioncube directory not found" && exit 1
-		cp ioncube_loader_lin_5.6.so /usr/lib/php/20131226/ >/dev/null 2>&1
-		echo -e "zend_extension = /usr/lib/php/20131226/ioncube_loader_lin_5.6.so" >/etc/php/5.6/fpm/conf.d/20-ioncube.ini
-		echo "zend_extension = /usr/lib/php/20131226/ioncube_loader_lin_5.6.so" >>/etc/php/5.6/fpm/php.ini
-		cd || _error "unable to change directory" && exit 1
-		rm -rf /tmp/*
+		(
+			apt-get -y install php${php}-dev git pkg-config build-essential libmemcached-dev
+			apt-get -y install php-memcached memcached
+		) >>"${vslog}" 2>&1 || {
+			_warn "Failed to install php-memcached and memcached"
+			exit 1
+		}
+		# install ioncube loader for php 7.4
+		if [[ ${php} == "7.4" ]]; then
+			(
+				cd /tmp || _error "Failed to change directory to /tmp" && exit 1
+				wget https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz
+				tar -xvzf ioncube_loaders_lin_x86-64.tar.gz
+				cd ioncube || _error "Failed to change directory to /tmp/ioncube" && exit 1
+				cp -f ioncube_loader_lin_7.4.so /usr/lib/php/20190902/ || _error "Failed to copy ioncube_loader_lin_7.4.so to /usr/lib/php/20190902/" && exit 1
+				echo "zend_extension = /usr/lib/php/20190902/ioncube_loader_lin_7.4.so" >/etc/php/7.4/mods-available/ioncube.ini
+				ln -sf /etc/php/7.4/mods-available/ioncube.ini /etc/php/7.4/cli/conf.d/20-ioncube.ini
+				ln -sf /etc/php/7.4/mods-available/ioncube.ini /etc/php/7.4/fpm/conf.d/20-ioncube.ini
+				phpenmod -v 7.4 ioncube
+				systemctl restart php7.4-fpm
+				systemctl restart apache2
+			) >>"${vslog}" 2>&1 || {
+				_warn "Failed to install ioncube loader for php 7.4"
+				exit 1
+			}
+		fi
+		# install ioncube loader for php 8.1
+		if [[ ${php} == "8.1" ]]; then
+			(
+				cd /tmp || _error "Failed to change directory to /tmp" && exit 1
+				wget https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz
+				tar -xvzf ioncube_loaders_lin_x86-64.tar.gz
+				cd ioncube || _error "Failed to change directory to /tmp/ioncube" && exit 1
+				cp -f ioncube_loader_lin_8.1.so /usr/lib/php/20210902/ || _error "Failed to copy ioncube_loader_lin_8.1.so to /usr/lib/php/20210902/" && exit 1
+				echo "zend_extension = /usr/lib/php/20210902/ioncube_loader_lin_8.1.so" >/etc/php/8.1/mods-available/ioncube.ini
+				{ echo "zend_extension = /usr/lib/php/20210902/ioncube_loader_lin_8.1.so" >> "$(php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||")"; } || {
+					_warn "Failed to add ioncube loader to php.ini"
+					exit 1
+				}
+				ln -sf /etc/php/8.1/mods-available/ioncube.ini /etc/php/8.1/cli/conf.d/20-ioncube.ini
+				ln -sf /etc/php/8.1/mods-available/ioncube.ini /etc/php/8.1/fpm/conf.d/20-ioncube.ini
+				phpenmod -v 8.1 ioncube
+			) >>"${vslog}" 2>&1 || {
+				_warn "Failed to install ioncube loader for php 8.1"
+				exit 1
+			}
+		fi
 		echo "${OK}"
 	fi
 }
@@ -1150,22 +1184,62 @@ vstacklet::ioncube::install() {
 ##################################################################################
 # @name: vstacklet::mariadb::install (17)
 # @description: install mariadb and configure
-# @option: $1 - -mariadb | --mariadb (optional) (takes no arguments)
-# @option: $2 - -mariadbP | --mariadb_port (optional) (takes one argument)
-# @option: $3 - -mariadbU | --mariadb_user (optional) (takes one argument)
-# @option: $4 - -mariadbPw | --mariadb_password (optional) (takes one argument)
-# @arg: $1 - [port] (optional) (default: 3306)
-# @arg: $2 - [user] (optional) (default: root)
-# @arg: $3 - [password] (optional) (default: password auto-generated)
+# @option: $1 - `-mariadb | --mariadb` (optional) (takes no arguments)
+# @option: $2 - `-mariadbP | --mariadb_port` (optional) (takes one argument)
+# @option: $3 - `-mariadbU | --mariadb_user` (optional) (takes one argument)
+# @option: $4 - `-mariadbPw | --mariadb_password` (optional) (takes one argument)
+# @arg: $2 - `[port]` (optional) (default: 3306)
+# @arg: $3 - `[user]` (optional) (default: root)
+# @arg: $4 - `[password]` (optional) (default: password auto-generated)
 # @example: ./vstacklet.sh -mariadb -mariadbP 3306 -mariadbU root -mariadbPw password
 # ./vstacklet.sh --mariadb --mariadb_port 3306 --mariadb_user root --mariadb_password password
-# @null:
 # @break
 ##################################################################################
 vstacklet::mariadb::install() {
 	if [[ -n ${mariadb} ]]; then
-		export DEBIAN_FRONTEND=noninteractive
-		apt-get -y install mariadb-server >>"${vslog}" 2>&1
+		[[ -z ${mariadb_port} ]] && mariadb_port=3306
+		[[ -z ${mariadb_user} ]] && mariadb_user="root"
+		[[ -z ${mariadb_password} ]] && mariadb_password=$(openssl rand -base64 12)
+		echo -n "${green}Installing MariaDB${normal} ... "
+		(
+			DEBIAN_FRONTEND=noninteractive apt-get --allow-unauthenticated -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install mariadb-server mariadb-client
+		) >>"${vslog}" 2>&1 || {
+			_warn "Failed to install MariaDB"
+			exit 1
+		}
+		# configure mariadb
+		echo -n "${green}Configuring MariaDB${normal} ... "
+		# set mariadb root password
+		mysqladmin -u root password "${mariadb_password}" >>"${vslog}" 2>&1 || {
+			_warn "Failed to set MariaDB root password"
+			exit 1
+		}
+		# create mariadb user
+		mysql -u root -p"${mariadb_password}" -e "CREATE USER '${mariadb_user}'@'localhost' IDENTIFIED BY '${mariadb_password}';" >>"${vslog}" 2>&1 || {
+			_warn "Failed to create MariaDB user"
+			exit 1
+		}
+		# grant privileges to mariadb user
+		mysql -u root -p"${mariadb_password}" -e "GRANT ALL PRIVILEGES ON *.* TO '${mariadb_user}'@'localhost' WITH GRANT OPTION;" >>"${vslog}" 2>&1 || {
+			_warn "Failed to grant privileges to MariaDB user"
+			exit 1
+		}
+		# flush privileges
+		mysql -u root -p"${mariadb_password}" -e "FLUSH PRIVILEGES;" >>"${vslog}" 2>&1 || {
+			_warn "Failed to flush privileges"
+			exit 1
+		}
+		# set mariadb client and server configuration
+		{
+			echo -e "[client]"
+			echo -e "port = ${mariadb_port}"
+			echo -e "socket = /var/run/mysqld/mysqld.sock"
+			echo -e "[mysqld]"
+			echo -e "port = ${mariadb_port}"
+			echo -e "socket = /var/run/mysqld/mysqld.sock"
+			echo -e "bind-address = 127.0.0.1"
+
+		} >/etc/mysql/conf.d/vstacklet.cnf
 		echo "${OK}"
 	fi
 }
